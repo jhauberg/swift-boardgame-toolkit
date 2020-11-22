@@ -1,0 +1,109 @@
+html, body {
+  margin: 0;
+  padding: 0;
+}
+
+.page {
+  background: #fff;
+
+  overflow: hidden;
+
+  position: relative;
+
+  box-sizing: border-box;
+}
+
+.page-content {
+    position: relative;
+
+    box-sizing: border-box;
+}
+
+.component {
+    position: absolute;
+    box-sizing: border-box;
+}
+
+.component-content {
+  overflow: hidden;
+
+  position: relative;
+
+  width: 100%;
+  height: 100%;
+}
+
+.component-element {
+    position: absolute;
+    box-sizing: border-box;
+}
+
+.guide {
+    position: absolute;
+    /*visibility: hidden;*/ /* we could hide these for preview */
+}
+
+.do-not-print {
+    /* note that this setting does not really have anything to do with printing or not;
+     however, typically elements that you specify as not for print are elements used exclusively
+     for the preview; for example, the bleed/trim/safe overlays
+     these elements should not block a cursor from selecting text or similar on the actual
+     content elements, so we leave it here for now
+     if it turns out to make a difference, and for whatever reason actually makes sense to receive
+     pointer events on a non-printable element, then we will figure out a better solution at that point
+     */
+    pointer-events: none;
+}
+
+@media screen {
+  html, body {
+    background-color: #eee;
+  }
+
+  .page {
+    margin: 1cm auto;
+
+    box-shadow: 0 4px 5px rgba(75, 75, 75, 0.2);
+  }
+}
+
+@media print {
+  @page {
+    margin: 0 !important;
+  }
+
+  html, body {
+    background-color: #fff;
+    height: auto;
+    /* Force printing of backgrounds and other graphics */
+    -webkit-print-color-adjust: exact;
+    color-adjust: exact;
+  }
+
+  .guide {
+      visibility: visible;
+  }
+
+  .do-not-print {
+    display: none !important;
+  }
+
+  .page {
+    border: 1mm dashed grey; /* todo: adjust this for best preview; it's not meant for printing, just to align- maybe make it red? */
+
+    overflow: hidden;
+
+    background: initial !important;
+    box-shadow: none !important;
+
+    /* Force page breaks after each .page element of the document */
+    page-break-after: always;
+    page-break-before: none;
+    page-break-inside: avoid;
+  }
+
+  /* Except for the last .page element to avoid a blank ending page */
+  .page:last-child {
+    page-break-after: auto;
+  }
+}
