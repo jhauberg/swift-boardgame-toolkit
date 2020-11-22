@@ -25,5 +25,9 @@ let package = Package(
                 .copy("templates"),
             ]
         ),
+        .testTarget(
+            name: "BoardgameKitTests",
+            dependencies: ["BoardgameKit"]
+        ),
     ]
 )
