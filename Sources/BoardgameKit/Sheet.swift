@@ -19,16 +19,16 @@ public enum SheetError: Error {
 }
 
 public final class Sheet {
-    public final let meta: SheetDescription?
+    public final let description: SheetDescription?
 
-    let resourceURL: URL?
+    final let bundle: Bundle?
 
     public init(
         description: SheetDescription? = nil,
-        resourceURL: URL? = nil
+        bundle: Bundle? = nil
     ) {
-        meta = description
-        self.resourceURL = resourceURL
+        self.description = description
+        self.bundle = bundle
     }
 
     private func cutGuideGrid(page: Page, spacing: Measurement<UnitLength>) {
@@ -431,7 +431,7 @@ public final class Sheet {
             let delegate = BrowserDelegate(
                 template: renderTemplate,
                 url: url,
-                resourceURL: resourceURL,
+                resourceURL: bundle?.resourceURL,
                 components: configuration.components
             )
             delegate.dpi = configuration.dpi
@@ -466,7 +466,7 @@ public final class Sheet {
                 fatalError()
             }
             try FileManager.default.copyItem(at: templateSiteUrl, to: siteUrl)
-            if let assetsUrl = resourceURL?.appendingPathComponent("assets") {
+            if let assetsUrl = bundle?.resourceURL?.appendingPathComponent("assets") {
                 try FileManager.default.copyItem(
                     at: assetsUrl, to: siteUrl.appendingPathComponent("assets")
                 )
@@ -480,8 +480,8 @@ public final class Sheet {
             }
 
             let index = try String(contentsOf: indexUrl, encoding: .utf8)
-                .replacingOccurrences(of: "{{author}}", with: "name")
-                .replacingOccurrences(of: "{{description}}", with: "descriptive text")
+                .replacingOccurrences(of: "{{author}}", with: description?.author ?? "")
+                .replacingOccurrences(of: "{{description}}", with: description?.copyright ?? "")
                 .replacingOccurrences(
                     of: "{{generator}}",
                     with: "swift-boardgame-toolkit \(BoardgameKit.version)")
