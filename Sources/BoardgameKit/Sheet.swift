@@ -18,6 +18,57 @@ public enum SheetError: Error {
     case notLaidOut(amount: Int)
 }
 
+extension Array where Element == Page {
+    func interleavedWithBackPages(layout: ([Component]) -> [Page]) -> [Page] {
+        var interleavedPages: [Page] = []
+        for page in self {
+            let components: [Component] = page.components.compactMap {
+                if case let .component(c, _, _, _) = $0 {
+                    return c
+                } else {
+                    return nil
+                }
+            }
+
+            guard let _ = components.first(where: { $0.back != nil }) else {
+                // at least one component on this page must have a back to proceed;
+                // otherwise append a blank page and skip to next
+                interleavedPages.append(page)
+                // for duplex printing, the number of pages must be even;
+                // i.e. we must interleave a blank piece of paper for the remaining
+                // back pages to print properly
+                interleavedPages.append(Page(size: page.bounds))
+                continue
+            }
+
+            var backs: [Component] = []
+            for component in components {
+                if let back = component.back {
+                    backs.append(back)
+                } else {
+                    backs.append(
+                        // empty back, sized to match
+                        Component(size: component.full.extent,
+                                  // bounds include bleed/trim already
+                                  bleed: 0.inches,
+                                  trim: 0.inches)
+                    )
+                }
+            }
+
+            let duplexedPages = layout(backs)
+            guard duplexedPages.count == 1, let backPage = duplexedPages.first else {
+                // if we somehow end up with more than one page, something went wrong
+                fatalError()
+            }
+
+            interleavedPages.append(page)
+            interleavedPages.append(backPage)
+        }
+        return interleavedPages
+    }
+}
+
 public struct Sheet {
     public let description: SheetDescription?
 
@@ -272,7 +323,7 @@ public struct Sheet {
                     applying: cutGuideGrid
                 )
 
-                let interleavedPages = interleaveBackPages(for: laidOutPages) { backs in
+                let interleavedPages = laidOutPages.interleavedWithBackPages { backs in
                     layoutLeftToRight(
                         components: backs,
                         spacing: gap,
@@ -357,59 +408,6 @@ public struct Sheet {
         }
 
         return pages
-    }
-
-    private func interleaveBackPages(for pages: [Page], layout: ([Component]) -> [Page]) -> [Page] {
-        var interleavedPages: [Page] = []
-        for page in pages {
-            let components: [Component] = page.components.compactMap {
-                if case let .component(c, _, _, _) = $0 {
-                    return c
-                } else {
-                    return nil
-                }
-            }
-
-            guard let referenceComponent = components.first(where: { $0.back != nil }) else {
-                // at least one component on this page must have a back to proceed;
-                // otherwise append a blank page and skip to next
-                interleavedPages.append(page)
-                // for duplex printing, the number of pages must be even;
-                // i.e. we must interleave a blank piece of paper for the remaining
-                // back pages to print properly
-
-                interleavedPages.append(Page(size: page.bounds))
-                continue
-            }
-
-            var backs: [Component] = []
-            for component in components {
-                if let back = component.back {
-                    backs.append(back)
-                } else {
-                    backs.append(
-                        // empty back; note intentionally not init'ed with overlay
-                        Component(size: referenceComponent.portraitOrientedBounds,
-                                  // bounds include bleed/trim already
-                                  bleed: 0.inches,
-                                  trim: 0.inches)
-                    )
-                }
-            }
-
-            let duplexedPages = layout(backs)
-
-            guard duplexedPages.count == 1,
-                  let backPage = duplexedPages.first
-            else {
-                // if we somehow end up with more than one page, something went wrong
-                fatalError()
-            }
-
-            interleavedPages.append(page)
-            interleavedPages.append(backPage)
-        }
-        return interleavedPages
     }
 
     public func images(type: ImageType, configuration: ImageConfiguration) throws {
