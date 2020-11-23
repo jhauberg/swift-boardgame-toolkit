@@ -213,31 +213,35 @@ public struct Sheet {
                     var page = Page(size: configuration.paper.extent, mode: .relativeToPageMargins)
 
                     for arrangement in arrangements {
-                        let offset = arrangement.offset
-
                         switch arrangement.kind {
-                        case let .placement(breaks, rotation):
+                        case let .placement(rotation):
                             guard let component = components.popLast() else {
                                 // all components have been arranged; continue until gone through
                                 // all arrangements (there might still be cuts/folds left)
                                 continue
                             }
 
+                            guard let offset = arrangement.offset else {
+                                print("warning: missing offset")
+                                continue
+                            }
                             page.arrange(
                                 component,
                                 x: offset.width,
                                 y: offset.height,
                                 rotatedBy: rotation
                             )
-
-                            if breaks {
-                                pages.append(page)
-                                page = Page(
-                                    size: configuration.paper.extent,
-                                    mode: .relativeToPageMargins
-                                )
-                            }
+                        case .pagebreak:
+                            pages.append(page)
+                            page = Page(
+                                size: configuration.paper.extent,
+                                mode: .relativeToPageMargins
+                            )
                         case let .cut(distance, vertically):
+                            guard let offset = arrangement.offset else {
+                                print("warning: missing offset")
+                                continue
+                            }
                             page.cut(
                                 x: offset.width,
                                 y: offset.height,
@@ -245,6 +249,10 @@ public struct Sheet {
                                 vertically: vertically
                             )
                         case let .fold(distance, vertically):
+                            guard let offset = arrangement.offset else {
+                                print("warning: missing offset")
+                                continue
+                            }
                             page.fold(
                                 x: offset.width,
                                 y: offset.height,

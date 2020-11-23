@@ -45,46 +45,50 @@ public struct Layout {
     }
 
     enum ArrangementType {
-        case placement(breaks: Bool, turned: Turn?)
-        case cut(distance: Measurement<UnitLength>, vertically: Bool)
-        case fold(distance: Measurement<UnitLength>, vertically: Bool)
+        case placement(turned: Turn?)
+        case pagebreak
+        case cut(distance: Distance, vertically: Bool)
+        case fold(distance: Distance, vertically: Bool)
     }
 
     public struct Arrangement {
-        private let x: Measurement<UnitLength>
-        private let y: Measurement<UnitLength>
+        private(set) var offset: Size?
 
         let kind: ArrangementType
 
+        init(offset: Size? = nil, kind: ArrangementType) {
+            self.offset = offset
+            self.kind = kind
+        }
+
         public static func at(
-            x: Measurement<UnitLength>,
-            y: Measurement<UnitLength>,
-            turned rotation: Turn? = nil,
-            breaks: Bool = false
+            x: Units,
+            y: Units,
+            turned rotation: Turn? = nil
         ) -> Arrangement {
-            Arrangement(x: x, y: y, kind: .placement(breaks: breaks, turned: rotation))
+            Arrangement(offset: Size(width: x, height: y), kind: .placement(turned: rotation))
         }
 
         public static func cut(
-            x: Measurement<UnitLength>,
-            y: Measurement<UnitLength>,
-            distance: Measurement<UnitLength>,
+            x: Units,
+            y: Units,
+            distance: Distance,
             vertically: Bool = false
         ) -> Arrangement {
-            Arrangement(x: x, y: y, kind: .cut(distance: distance, vertically: vertically))
+            Arrangement(offset: Size(width: x, height: y), kind: .cut(distance: distance, vertically: vertically))
         }
 
         public static func fold(
-            x: Measurement<UnitLength>,
-            y: Measurement<UnitLength>,
-            distance: Measurement<UnitLength>,
+            x: Units,
+            y: Units,
+            distance: Distance,
             vertically: Bool = false
         ) -> Arrangement {
-            Arrangement(x: x, y: y, kind: .fold(distance: distance, vertically: vertically))
+            Arrangement(offset: Size(width: x, height: y), kind: .fold(distance: distance, vertically: vertically))
         }
 
-        var offset: Size {
-            Size(width: x, height: y)
+        public static func pagebreak() -> Arrangement {
+            Arrangement(kind: .pagebreak)
         }
     }
 
