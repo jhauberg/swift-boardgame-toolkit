@@ -291,13 +291,14 @@ extension Element: HTMLConvertible {
             var style = Style()
             style.set("top", value: y)
             style.set("left", value: x)
+            // note using full extent here; i.e. including bleed
             style.set("width", value: component.full.extent.width)
             style.set("height", value: component.full.extent.height)
 
             let angle = rotation?.clockwiseOrientedRotation
 
             let isLandscaped: Bool = component.full.extent.width > component.full.extent.height
-            let portraitBounds = component.portraitOrientedBounds
+            let portraitBounds = component.portraitOrientedExtent
             let w = portraitBounds.width.converted(to: .inches).value
             let h = portraitBounds.height.converted(to: .inches).value
 
@@ -343,7 +344,7 @@ extension Element: HTMLConvertible {
             // it can be higher or lower; there's no specific distance that is correct,
             // but as low as possible without introducing overflow is preferable;
             // the distance required can vary from browser to browser
-            let h = page.bounds.height - 0.25.millimeters
+            let h = page.extent.height - 0.25.millimeters
 
             let content = page.elements.map(\.html).joined()
 
@@ -352,7 +353,7 @@ extension Element: HTMLConvertible {
                 let horizontalPadding = margin.width
                 let verticalPadding = margin.height
                 var style = Style()
-                style.set("width", value: page.bounds.width)
+                style.set("width", value: page.extent.width)
                 style.set("height", value: h)
                 style.set("padding", value: verticalPadding)
                 style.append("padding", value: horizontalPadding)
@@ -371,7 +372,7 @@ extension Element: HTMLConvertible {
                 let inner = page.boundingBox
                 let verticalMargin = (h - inner.height) / 2
                 var style = Style()
-                style.set("width", value: page.bounds.width)
+                style.set("width", value: page.extent.width)
                 style.set("height", value: h)
                 var innerStyle = Style()
                 innerStyle.set("width", value: inner.width)
@@ -403,7 +404,7 @@ extension Element: HTMLConvertible {
                     with: "swift-boardgame-toolkit \(BoardgameKit.version)")
                 .replacingOccurrences(
                     of: "{{page_dimensions}}",
-                    with: "\(paper.size.width) by \(paper.size.height)"
+                    with: "\(paper.extent.width) by \(paper.extent.height)"
                 )
                 .replacingOccurrences(of: "{{pages}}", with: pagesHtml)
         }

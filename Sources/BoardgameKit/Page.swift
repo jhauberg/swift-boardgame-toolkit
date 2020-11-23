@@ -5,14 +5,14 @@ enum PageCoordinateSystem {
     case relativeToBoundingBox
 }
 
-final class Page {
-    let bounds: Size
+final class Page: Dimensioned {
+    let extent: Size
     let mode: PageCoordinateSystem
 
     var elements: [Element] = []
 
     init(size: Size, mode: PageCoordinateSystem = .relativeToBoundingBox) {
-        bounds = size
+        self.extent = size
         self.mode = mode
     }
 
@@ -20,8 +20,8 @@ final class Page {
         var offsets: [Size] = []
         for case let .component(component, x, y, _) in elements {
             offsets.append(Size(width: x, height: y))
-            offsets.append(Size(width: x + component.portraitOrientedBounds.width,
-                                height: y + component.portraitOrientedBounds.height))
+            offsets.append(Size(width: x + component.portraitOrientedExtent.width,
+                                height: y + component.portraitOrientedExtent.height))
         }
 
         return .containingOffsets(offsets)

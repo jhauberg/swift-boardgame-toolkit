@@ -12,16 +12,17 @@ public struct BuilderContext {
 
 // note that Component must be a class because it would otherwise
 // contain a recursive value type; i.e. `back`
-public final class Component {
-    private let size: Size
+public final class Component: Dimensioned {
+    private(set) var extent: Size
+    
     private let trim: Distance
     private let bleed: Distance
 
     let full: Area
     let innerRect: Area
-    let safeRect: Area
+    private let safeRect: Area
 
-    let portraitOrientedBounds: Size
+    let portraitOrientedExtent: Size
 
     private(set) var elements: [Element] = []
 
@@ -49,14 +50,14 @@ public final class Component {
         precondition(bleed.value >= 0)
         precondition(trim.value >= 0)
 
-        self.size = size
+        self.extent = size
         self.bleed = bleed
         self.trim = trim
 
-        let bounds = Size(width: self.size.width + bleed * 2,
-                          height: self.size.height + bleed * 2)
+        let bounds = Size(width: self.extent.width + bleed * 2,
+                          height: self.extent.height + bleed * 2)
 
-        portraitOrientedBounds = Size(width: min(bounds.width, bounds.height),
+        portraitOrientedExtent = Size(width: min(bounds.width, bounds.height),
                                       height: max(bounds.width, bounds.height))
 
         full = Area(extent: bounds)
@@ -105,8 +106,8 @@ public final class Component {
 
     public func backside(@FeatureBuilder _ form: (_ context: BuilderContext) -> Feature) -> Self {
         back = Component(
-            width: size.width,
-            height: size.height,
+            width: extent.width,
+            height: extent.height,
             bleed: bleed,
             trim: trim,
             form
@@ -119,8 +120,8 @@ public final class Component {
             print("warning: using frontside component as backside; back not set")
             return self
         }
-        guard component.size.width == size.width,
-              component.size.height == size.height,
+        guard component.extent.width == extent.width,
+              component.extent.height == extent.height,
               component.bleed == bleed,
               trim == trim
         else {

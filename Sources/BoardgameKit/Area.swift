@@ -1,6 +1,6 @@
 import Foundation
 
-public struct Area {
+public struct Area: Dimensioned {
     public let extent: Size
 
     public static let empty = Area(extent: .zero)

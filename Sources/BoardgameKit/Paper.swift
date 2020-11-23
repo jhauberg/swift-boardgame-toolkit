@@ -2,18 +2,18 @@ import Foundation
 
 public typealias Margin = Size
 
-public struct Paper {
-    public let size: Size
+public struct Paper: Dimensioned {
+    public let extent: Size
     public let margin: Margin
 
     init(_ size: Size, _ margin: Margin) {
-        self.size = size
+        self.extent = size
         self.margin = margin
     }
 
-    var bounds: Size {
-        Size(width: size.width - margin.width * 2,
-             height: size.height - margin.height * 2)
+    var innerBounds: Size {
+        Size(width: extent.width - margin.width * 2,
+             height: extent.height - margin.height * 2)
     }
 
     public static let letter = Paper(Size(width: 21.59.centimeters,
@@ -27,14 +27,14 @@ public struct Paper {
                                         height: 8.millimeters))
 
     public var portrait: Paper {
-        Paper(Size(width: min(size.width, size.height),
-                   height: max(size.width, size.height)),
+        Paper(Size(width: min(extent.width, extent.height),
+                   height: max(extent.width, extent.height)),
               margin)
     }
 
     public var landscape: Paper {
-        Paper(Size(width: max(size.width, size.height),
-                   height: min(size.width, size.height)),
+        Paper(Size(width: max(extent.width, extent.height),
+                   height: min(extent.width, extent.height)),
               margin)
     }
 }

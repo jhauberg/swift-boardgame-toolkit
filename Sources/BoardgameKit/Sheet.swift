@@ -132,8 +132,8 @@ public struct Sheet {
 
     private func arrange(using configuration: DocumentConfiguration) throws -> [Page] {
         let bounds = Size(
-            width: configuration.paper.size.width - configuration.paper.margin.width * 2,
-            height: configuration.paper.size.height - configuration.paper.margin.height * 2
+            width: configuration.paper.extent.width - configuration.paper.margin.width * 2,
+            height: configuration.paper.extent.height - configuration.paper.margin.height * 2
         )
 
         let allComponents: [Component] = configuration.layouts.flatMap {
@@ -141,12 +141,12 @@ public struct Sheet {
         }
 
         if let component = allComponents.first(
-            where: { $0.portraitOrientedBounds.width > bounds.width ||
-                $0.portraitOrientedBounds.height > bounds.height
+            where: { $0.portraitOrientedExtent.width > bounds.width ||
+                $0.portraitOrientedExtent.height > bounds.height
             }
         ) {
             // a component won't fit on a page inside bounds
-            throw SheetError.outOfBounds(size: component.portraitOrientedBounds)
+            throw SheetError.outOfBounds(size: component.portraitOrientedExtent)
         }
 
         var pages: [Page] = []
@@ -210,7 +210,7 @@ public struct Sheet {
                 // but still want the components in original order
 
                 while !components.isEmpty { // repeat until we've arranged all components
-                    var page = Page(size: configuration.paper.size, mode: .relativeToPageMargins)
+                    var page = Page(size: configuration.paper.extent, mode: .relativeToPageMargins)
 
                     for arrangement in arrangements {
                         let offset = arrangement.offset
@@ -233,7 +233,7 @@ public struct Sheet {
                             if breaks {
                                 pages.append(page)
                                 page = Page(
-                                    size: configuration.paper.size,
+                                    size: configuration.paper.extent,
                                     mode: .relativeToPageMargins
                                 )
                             }
@@ -276,14 +276,14 @@ public struct Sheet {
         let hasGap = spacing > 0.inches || c.innerRect.left > 0.inches
         // note: assuming every component is identically sized on this page!
         let b = page.boundingBox
-        let rows = Int(b.height.converted(to: .inches).value / c.portraitOrientedBounds.height
+        let rows = Int(b.height.converted(to: .inches).value / c.portraitOrientedExtent.height
                         .converted(to: .inches).value) + (hasGap ? 0 : 1)
-        let columns = Int(b.width.converted(to: .inches).value / c.portraitOrientedBounds.width
+        let columns = Int(b.width.converted(to: .inches).value / c.portraitOrientedExtent.width
                             .converted(to: .inches).value) + (hasGap ? 0 : 1)
 
         // note that this also produce cut guides for empty slots
         for row in 0 ..< rows {
-            let y = (c.portraitOrientedBounds.height * Double(row)) + (spacing * Double(row))
+            let y = (c.portraitOrientedExtent.height * Double(row)) + (spacing * Double(row))
 
             page.cut(
                 // top
@@ -295,14 +295,14 @@ public struct Sheet {
                 page.cut(
                     // bottom
                     x: 0.inches - guideLength,
-                    y: y + c.portraitOrientedBounds.height - c.innerRect.top,
+                    y: y + c.portraitOrientedExtent.height - c.innerRect.top,
                     distance: b.width + guideLength * 2
                 )
             }
         }
 
         for column in 0 ..< columns {
-            let x = (c.portraitOrientedBounds.width * Double(column)) + (spacing * Double(column))
+            let x = (c.portraitOrientedExtent.width * Double(column)) + (spacing * Double(column))
 
             page.cut(
                 // left
@@ -314,7 +314,7 @@ public struct Sheet {
             if hasGap {
                 page.cut(
                     // right
-                    x: x + c.portraitOrientedBounds.width - c.innerRect.left,
+                    x: x + c.portraitOrientedExtent.width - c.innerRect.left,
                     y: 0.inches - guideLength,
                     distance: b.height + guideLength * 2,
                     vertically: true
@@ -341,8 +341,8 @@ fileprivate extension Array where Element == Layout {
             var chunks: [[Component]] = []
             for component in layout.components {
                 if let previousSize = previousComponentSize,
-                   previousSize.width != component.portraitOrientedBounds.width ||
-                    previousSize.height != component.portraitOrientedBounds.height
+                   previousSize.width != component.portraitOrientedExtent.width ||
+                    previousSize.height != component.portraitOrientedExtent.height
                 {
                     chunks.append(collected)
                     collected = []
@@ -350,7 +350,7 @@ fileprivate extension Array where Element == Layout {
 
                 collected.append(component)
 
-                previousComponentSize = component.portraitOrientedBounds
+                previousComponentSize = component.portraitOrientedExtent
             }
             if !collected.isEmpty {
                 chunks.append(collected)
@@ -383,7 +383,7 @@ fileprivate extension Array where Element == Page {
                 // for duplex printing, the number of pages must be even;
                 // i.e. we must interleave a blank piece of paper for the remaining
                 // back pages to print properly
-                interleavedPages.append(Page(size: page.bounds))
+                interleavedPages.append(Page(size: page.extent))
                 continue
             }
 
@@ -432,15 +432,15 @@ fileprivate extension Array where Element == Component {
         var x = origin.width
         var y = origin.height
 
-        var page = Page(size: paper.size)
+        var page = Page(size: paper.extent)
         var content: [(Size, Component)] = []
 
         let pagebreak: (Bool) -> Void = { more in
             var offsets: [Size] = []
             for (offset, component) in content {
                 offsets.append(Size(width: offset.width, height: offset.height))
-                offsets.append(Size(width: offset.width + component.portraitOrientedBounds.width,
-                                    height: offset.width + component.portraitOrientedBounds.height))
+                offsets.append(Size(width: offset.width + component.portraitOrientedExtent.width,
+                                    height: offset.width + component.portraitOrientedExtent.height))
             }
 
             let bb = Size.containingOffsets(offsets)
@@ -448,7 +448,7 @@ fileprivate extension Array where Element == Component {
             for (offset, component) in content {
                 if reverse {
                     page.component(component,
-                                   x: bb.width - offset.width - component.portraitOrientedBounds
+                                   x: bb.width - offset.width - component.portraitOrientedExtent
                                     .width,
                                    y: offset.height)
                 } else {
@@ -464,7 +464,7 @@ fileprivate extension Array where Element == Component {
             pages.append(page)
 
             if more {
-                page = Page(size: paper.size)
+                page = Page(size: paper.extent)
                 x = origin.width
                 y = origin.height
             }
@@ -482,19 +482,19 @@ fileprivate extension Array where Element == Component {
             content.append((offset, component))
 
             // increment positions
-            x = offset.width + (component.portraitOrientedBounds.width + spacing)
+            x = offset.width + (component.portraitOrientedExtent.width + spacing)
 
-            let nextRightEdge = x + component.portraitOrientedBounds
+            let nextRightEdge = x + component.portraitOrientedExtent
                 .width // note using 'x', not offset.width
-            if nextRightEdge > paper.bounds.width {
+            if nextRightEdge > paper.innerBounds.width {
                 // next line
                 x = origin.width
-                y = offset.height + (component.portraitOrientedBounds.height + spacing)
+                y = offset.height + (component.portraitOrientedExtent.height + spacing)
             }
 
-            let nextBottomEdge = y + component.portraitOrientedBounds
+            let nextBottomEdge = y + component.portraitOrientedExtent
                 .height // note using 'y', not offset.height
-            if nextBottomEdge > paper.bounds.height {
+            if nextBottomEdge > paper.innerBounds.height {
                 // next page
                 pagebreak(true)
             }

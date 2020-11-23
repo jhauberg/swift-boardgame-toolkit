@@ -64,8 +64,8 @@ class BrowserDelegatePDF: NSObject, WKNavigationDelegate {
             // A4 = 8,27in (21cm) x 11.69in (29.7cm)
             //    = 8,27x72       x 11.69x72
             //    = 595px (round) x 842px (round)
-            let w: Double = paper.size.width.converted(to: .inches).value * userSpaceDPI
-            let h: Double = paper.size.height.converted(to: .inches).value * userSpaceDPI
+            let w: Double = paper.extent.width.converted(to: .inches).value * userSpaceDPI
+            let h: Double = paper.extent.height.converted(to: .inches).value * userSpaceDPI
 
             printInfo.paperSize = NSSize(
                 width: round(w),
@@ -136,8 +136,8 @@ class BrowserDelegate: NSObject, WKNavigationDelegate {
         let renderHtml = template.replacingOccurrences(of: "{{component}}", with: element.html)
 
         let nativeDPI: Double = 96 // this is required to get correct sizing; see snapshot to apply desired dpi
-        let w = component.portraitOrientedBounds.width.converted(to: .inches).value * nativeDPI
-        let h = component.portraitOrientedBounds.height.converted(to: .inches).value * nativeDPI
+        let w = component.portraitOrientedExtent.width.converted(to: .inches).value * nativeDPI
+        let h = component.portraitOrientedExtent.height.converted(to: .inches).value * nativeDPI
 
         browser.navigationDelegate = self
         browser.frame = NSRect(origin: .zero, size: CGSize(width: w, height: h))
@@ -153,7 +153,7 @@ class BrowserDelegate: NSObject, WKNavigationDelegate {
             return
         }
         let configuration = WKSnapshotConfiguration()
-        let w = (component.portraitOrientedBounds.width.converted(to: .inches).value * dpi) / scale
+        let w = (component.portraitOrientedExtent.width.converted(to: .inches).value * dpi) / scale
         configuration.snapshotWidth = NSNumber(value: w)
         webView.takeSnapshot(with: configuration) { image, error in
             guard let image = image else {

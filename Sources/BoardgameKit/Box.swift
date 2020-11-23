@@ -15,10 +15,11 @@ struct BoxAttributes {
     var outerBorderWidth: Distance?
 }
 
-public struct Box: Feature {
+public struct Box: Feature, Dimensioned {
     public let form: Feature? = nil
 
-    private var bounds: Size
+    private(set) var extent: Size
+
     private var inset = Inset()
     private var attributes = BoxAttributes()
     private var htmlAttributes = HTMLAttributes()
@@ -26,7 +27,7 @@ public struct Box: Feature {
     public init(width: Distance, height: Distance) {
         precondition(width.value > 0)
         precondition(height.value > 0)
-        bounds = Size(width: width, height: height)
+        extent = Size(width: width, height: height)
     }
 
     public init(extent: Size) {
@@ -138,10 +139,10 @@ extension Box: Centerable {
     public func center(in area: Area, axis: Axis) -> Self {
         var copy = self
         if axis == .horizontal || axis == .both {
-            copy.inset.left = area.left + (area.extent.width / 2) - (bounds.width / 2)
+            copy.inset.left = area.left + (area.extent.width / 2) - (extent.width / 2)
         }
         if axis == .vertical || axis == .both {
-            copy.inset.top = area.top + (area.extent.height / 2) - (bounds.height / 2)
+            copy.inset.top = area.top + (area.extent.height / 2) - (extent.height / 2)
         }
         return copy
     }
@@ -150,13 +151,13 @@ extension Box: Centerable {
 extension Box: Confinable {
     func width(_ width: Distance, height: Distance? = nil) -> Self {
         var copy = self
-        copy.bounds = Size(width: width, height: height ?? bounds.height)
+        copy.extent = Size(width: width, height: height ?? extent.height)
         return copy
     }
 
     func height(_ height: Distance) -> Self {
         var copy = self
-        copy.bounds = Size(width: bounds.width, height: height)
+        copy.extent = Size(width: extent.width, height: height)
         return copy
     }
 }
@@ -165,7 +166,7 @@ extension Box: ElementConvertible {
     var element: Element {
         .rect(
             inset: inset,
-            bounds: bounds,
+            bounds: extent,
             attributes: attributes,
             additional: htmlAttributes
         )
