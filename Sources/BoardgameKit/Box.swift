@@ -10,7 +10,6 @@ struct BoxAttributes {
 
     var rotation: RotationAttributes?
 
-    // experimental
     var outerBorderColor: String?
     var outerBorderWidth: Distance?
 }
@@ -68,6 +67,7 @@ public struct Box: Feature, Dimensioned {
         return copy
     }
 
+    // note that borders always go _inside_ the box, as all features have `box-sizing: border-box`
     public func border(
         _ color: String,
         width: Distance = 1.millimeters,

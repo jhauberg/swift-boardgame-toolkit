@@ -5,6 +5,7 @@ public struct Area: Dimensioned {
 
     public static let empty = Area(extent: .zero)
 
+    // inset from respective edges of any parent area
     public private(set) var top: Distance
     public private(set) var left: Distance
     public private(set) var right: Distance

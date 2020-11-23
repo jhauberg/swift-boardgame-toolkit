@@ -223,7 +223,7 @@ public struct Sheet {
                                 continue
                             }
 
-                            page.component(
+                            page.arrange(
                                 component,
                                 x: offset.width,
                                 y: offset.height,
@@ -447,14 +447,13 @@ fileprivate extension Array where Element == Component {
 
             for (offset, component) in content {
                 if reverse {
-                    page.component(component,
-                                   x: bb.width - offset.width - component.portraitOrientedExtent
-                                    .width,
-                                   y: offset.height)
+                    page.arrange(component,
+                        x: bb.width - offset.width - component.portraitOrientedExtent.width,
+                        y: offset.height)
                 } else {
-                    page.component(component,
-                                   x: offset.width,
-                                   y: offset.height)
+                    page.arrange(component,
+                        x: offset.width,
+                        y: offset.height)
                 }
             }
 

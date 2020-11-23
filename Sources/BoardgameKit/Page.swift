@@ -35,13 +35,14 @@ final class Page: Dimensioned {
         }}
     }
 
-    func component(
+    func arrange(
         _ component: Component,
         x: Measurement<UnitLength>,
         y: Measurement<UnitLength>,
         rotatedBy rotation: Layout.Turn? = nil
     ) {
         elements.append(
+            // note that empty backs will also have overlays
             .component(component.withOverlays(), x: x, y: y, turned: rotation)
         )
     }
