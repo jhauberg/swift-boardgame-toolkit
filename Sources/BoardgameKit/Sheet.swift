@@ -482,7 +482,9 @@ public final class Sheet {
             let index = try String(contentsOf: indexUrl, encoding: .utf8)
                 .replacingOccurrences(of: "{{author}}", with: "name")
                 .replacingOccurrences(of: "{{description}}", with: "descriptive text")
-                .replacingOccurrences(of: "{{generator}}", with: "swift-boardgame-toolkit 0.1.0")
+                .replacingOccurrences(
+                    of: "{{generator}}",
+                    with: "swift-boardgame-toolkit \(BoardgameKit.version)")
                 .replacingOccurrences(
                     of: "{{page_dimensions}}",
                     with: "\(configuration.paper.size.width) by \(configuration.paper.size.height)"
