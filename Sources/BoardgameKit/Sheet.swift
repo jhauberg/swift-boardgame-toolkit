@@ -18,97 +18,6 @@ public enum SheetError: Error {
     case notLaidOut(amount: Int)
 }
 
-extension Array where Element == Layout {
-    // if a layout contains mixed-size components, this splits the layouts up into separate,
-    // individual layouts, ultimately forcing page-breaks so that every page contains
-    // only one size of component
-    var splitBySize: [Layout] {
-        var sanitizedLayouts: [Layout] = []
-        for layout in self {
-            if case .custom = layout.method {
-                // don't mess with this type of layout; mixing sizes is allowed here
-                sanitizedLayouts.append(layout)
-                continue
-            }
-            var previousComponentSize: Size?
-            var collected: [Component] = []
-            var chunks: [[Component]] = []
-            for component in layout.components {
-                if let previousSize = previousComponentSize,
-                   previousSize.width != component.portraitOrientedBounds.width ||
-                    previousSize.height != component.portraitOrientedBounds.height
-                {
-                    chunks.append(collected)
-                    collected = []
-                }
-
-                collected.append(component)
-
-                previousComponentSize = component.portraitOrientedBounds
-            }
-            if !collected.isEmpty {
-                chunks.append(collected)
-                collected = []
-            }
-            for chunk in chunks {
-                sanitizedLayouts.append(Layout(chunk, method: layout.method))
-            }
-        }
-        return sanitizedLayouts
-    }
-}
-
-extension Array where Element == Page {
-    func interleavedWithBackPages(layout: ([Component]) -> [Page]) -> [Page] {
-        var interleavedPages: [Page] = []
-        for page in self {
-            let components: [Component] = page.components.compactMap {
-                if case let .component(c, _, _, _) = $0 {
-                    return c
-                } else {
-                    return nil
-                }
-            }
-
-            guard let _ = components.first(where: { $0.back != nil }) else {
-                // at least one component on this page must have a back to proceed;
-                // otherwise append a blank page and skip to next
-                interleavedPages.append(page)
-                // for duplex printing, the number of pages must be even;
-                // i.e. we must interleave a blank piece of paper for the remaining
-                // back pages to print properly
-                interleavedPages.append(Page(size: page.bounds))
-                continue
-            }
-
-            var backs: [Component] = []
-            for component in components {
-                if let back = component.back {
-                    backs.append(back)
-                } else {
-                    backs.append(
-                        // empty back, sized to match
-                        Component(size: component.full.extent,
-                                  // bounds include bleed/trim already
-                                  bleed: 0.inches,
-                                  trim: 0.inches)
-                    )
-                }
-            }
-
-            let duplexedPages = layout(backs)
-            guard duplexedPages.count == 1, let backPage = duplexedPages.first else {
-                // if we somehow end up with more than one page, something went wrong
-                fatalError()
-            }
-
-            interleavedPages.append(page)
-            interleavedPages.append(backPage)
-        }
-        return interleavedPages
-    }
-}
-
 public struct Sheet {
     public let description: SheetDescription?
 
@@ -122,160 +31,106 @@ public struct Sheet {
         self.bundle = bundle
     }
 
-    private func cutGuideGrid(page: Page, spacing: Measurement<UnitLength>) {
-        guard case let .component(c, _, _, _) = page.components.first else {
-            return
-        }
-
-        let guideLength = 4.millimeters // distance beyond bounding box
-
-        // determine whether we should produce cut guides on either side of component
-        // if there is no gap or bleed, we can get away with only producing left/top
-        // cut guides, plus an additional guide for the last row/column
-        // otherwise we need to produce cut guides for all edges of the component
-        let hasGap = spacing > 0.inches || c.innerRect.left > 0.inches
-        // note: assuming every component is identically sized on this page!
-        let b = page.boundingBox
-        let rows = Int(b.height.converted(to: .inches).value / c.portraitOrientedBounds.height
-            .converted(to: .inches).value) + (hasGap ? 0 : 1)
-        let columns = Int(b.width.converted(to: .inches).value / c.portraitOrientedBounds.width
-            .converted(to: .inches).value) + (hasGap ? 0 : 1)
-
-        // note that this also produce cut guides for empty slots
-        for row in 0 ..< rows {
-            let y = (c.portraitOrientedBounds.height * Double(row)) + (spacing * Double(row))
-
-            page.cut(
-                // top
-                x: 0.inches - guideLength, y: y + c.innerRect.top,
-                distance: b.width + guideLength * 2
+    public func images(type: ImageType, configuration: ImageConfiguration) throws {
+        switch type {
+        case let .individual(url):
+            try FileManager.default.createDirectory(
+                at: url,
+                withIntermediateDirectories: true,
+                attributes: nil
             )
 
-            if hasGap {
-                page.cut(
-                    // bottom
-                    x: 0.inches - guideLength,
-                    y: y + c.portraitOrientedBounds.height - c.innerRect.top,
-                    distance: b.width + guideLength * 2
-                )
+            guard let renderTemplateUrl = Bundle.module.resourceURL?
+                .appendingPathComponent("templates/render/index.html"),
+                let renderTemplate = try? String(contentsOf: renderTemplateUrl, encoding: .utf8)
+            else {
+                return
             }
-        }
 
-        for column in 0 ..< columns {
-            let x = (c.portraitOrientedBounds.width * Double(column)) + (spacing * Double(column))
-
-            page.cut(
-                // left
-                x: x + c.innerRect.left, y: 0.inches - guideLength,
-                distance: b.height + guideLength * 2,
-                vertically: true
+            let delegate = BrowserDelegate(
+                template: renderTemplate,
+                url: url,
+                resourceURL: bundle?.resourceURL,
+                components: configuration.components
             )
+            delegate.dpi = configuration.dpi
+            delegate.renderNext()
 
-            if hasGap {
-                page.cut(
-                    // right
-                    x: x + c.portraitOrientedBounds.width - c.innerRect.left,
-                    y: 0.inches - guideLength,
-                    distance: b.height + guideLength * 2,
-                    vertically: true
-                )
-            }
+            let runLoop = RunLoop.current
+
+            while delegate.shouldKeepRunning,
+                  runLoop.run(mode: .default,
+                              before: .distantFuture) {}
+
+        case .tts(_):
+            fatalError("not implemented yet")
         }
     }
 
-    private func layoutLeftToRight(
-        components: [Component],
-        spacing: Measurement<UnitLength>,
-        on paper: Paper,
-        reverse: Bool = false,
-        applying cuts: @escaping (Page, Measurement<UnitLength>) -> Void
-    ) -> [Page] {
-        precondition(spacing.value >= 0)
+    public func document(type: DocumentType, configuration: DocumentConfiguration) throws {
+        switch type {
+        case let .web(url):
+            let pages = try arrange(using: configuration)
 
-        var pages: [Page] = []
-
-        let origin = Size(width: 0.inches, height: 0.inches)
-
-        // in this context, x corresponds to the top-left corner of a component
-        var x = origin.width
-        var y = origin.height
-
-        var page = Page(size: paper.size)
-        var content: [(Size, Component)] = []
-
-        let pagebreak: (Bool) -> Void = { more in
-            var offsets: [Size] = []
-            for (offset, component) in content {
-                offsets.append(Size(width: offset.width, height: offset.height))
-                offsets.append(Size(width: offset.width + component.portraitOrientedBounds.width,
-                                    height: offset.width + component.portraitOrientedBounds.height))
+            let siteUrl = url.appendingPathComponent("site")
+            try? FileManager.default.createDirectory(
+                at: url,
+                withIntermediateDirectories: true,
+                attributes: nil
+            )
+            try? FileManager.default.removeItem(at: siteUrl)
+            guard let templateSiteUrl = Bundle.module.resourceURL?
+                .appendingPathComponent("templates/site")
+            else {
+                fatalError()
+            }
+            try FileManager.default.copyItem(at: templateSiteUrl, to: siteUrl)
+            if let assetsUrl = bundle?.resourceURL?.appendingPathComponent("assets") {
+                try FileManager.default.copyItem(
+                    at: assetsUrl, to: siteUrl.appendingPathComponent("assets")
+                )
             }
 
-            let bb = Size.containingOffsets(offsets)
+            let indexUrl = siteUrl.appendingPathComponent("index.html")
+            let index = try String(contentsOf: indexUrl, encoding: .utf8)
 
-            for (offset, component) in content {
-                if reverse {
-                    page.component(component,
-                                   x: bb.width - offset.width - component.portraitOrientedBounds
-                                       .width,
-                                   y: offset.height)
-                } else {
-                    page.component(component,
-                                   x: offset.width,
-                                   y: offset.height)
-                }
-            }
+            let doc = Element.document(
+                template: index,
+                paper: configuration.paper,
+                pages: pages,
+                author: description?.author ?? "",
+                description: description?.copyright ?? "")
+            try doc.html.write(to: indexUrl, atomically: true, encoding: .utf8)
 
-            content = []
-            cuts(page, spacing)
+            print("saved site at \(siteUrl)")
 
-            pages.append(page)
+        case let .pdf(url):
+            let tempUrl = URL(fileURLWithPath: NSTemporaryDirectory())
+                .appendingPathComponent("swift-boardgame-toolkit")
+            try FileManager.default.createDirectory(
+                at: tempUrl,
+                withIntermediateDirectories: true,
+                attributes: nil
+            )
 
-            if more {
-                page = Page(size: paper.size)
-                x = origin.width
-                y = origin.height
-            }
+            try document(type: .web(at: tempUrl), configuration: configuration)
+            let siteUrl = tempUrl.appendingPathComponent("site")
+
+            let delegate = BrowserDelegatePDF(destinationUrl: url)
+            delegate.paperSize = configuration.paper
+            try delegate.load(siteUrl: siteUrl)
+
+            let runLoop = RunLoop.current
+
+            while delegate.shouldKeepRunning,
+                  runLoop.run(mode: .default,
+                              before: .distantFuture) {}
+
+            try FileManager.default.removeItem(at: tempUrl) // clean up
         }
-
-        for component in components {
-            let offset = Size(width: x, height: y)
-
-            // temporarily store offset and component before laying out on page;
-            // this is necessary to, at pagebreak, determine actual position on page
-            // if we were always just laying out left-to-right, we would not have to do this
-            // and could put it on page immediately; however, to determine the relative origin
-            // for a layout flowing right-to-left, we have to first figure out just how wide
-            // the relative boundary actually is
-            content.append((offset, component))
-
-            // increment positions
-            x = offset.width + (component.portraitOrientedBounds.width + spacing)
-
-            let nextRightEdge = x + component.portraitOrientedBounds
-                .width // note using 'x', not offset.width
-            if nextRightEdge > paper.bounds.width {
-                // next line
-                x = origin.width
-                y = offset.height + (component.portraitOrientedBounds.height + spacing)
-            }
-
-            let nextBottomEdge = y + component.portraitOrientedBounds
-                .height // note using 'y', not offset.height
-            if nextBottomEdge > paper.bounds.height {
-                // next page
-                pagebreak(true)
-            }
-        }
-
-        if !content.isEmpty {
-            pagebreak(false)
-        }
-
-        return pages
     }
 
-    private func organize(using configuration: DocumentConfiguration) throws -> [Page] {
+    private func arrange(using configuration: DocumentConfiguration) throws -> [Page] {
         let bounds = Size(
             width: configuration.paper.size.width - configuration.paper.margin.width * 2,
             height: configuration.paper.size.height - configuration.paper.margin.height * 2
@@ -302,8 +157,7 @@ public struct Sheet {
                 // natural layout is left-to-right
                 let components = layout.components(orderedBy: order)
 
-                let laidOutPages = layoutLeftToRight(
-                    components: components,
+                let laidOutPages = components.arrangedLeftToRight(
                     spacing: gap,
                     on: configuration.paper,
                     applying: cutGuideGrid
@@ -315,16 +169,14 @@ public struct Sheet {
                 // and separated to interleaved pages
                 let fronts = layout.components
 
-                let laidOutPages = layoutLeftToRight(
-                    components: fronts,
+                let laidOutPages = fronts.arrangedLeftToRight(
                     spacing: gap,
                     on: configuration.paper,
                     applying: cutGuideGrid
                 )
 
                 let interleavedPages = laidOutPages.interleavedWithBackPages { backs in
-                    layoutLeftToRight(
-                        components: backs,
+                    backs.arrangedLeftToRight(
                         spacing: gap,
                         on: configuration.paper,
                         reverse: true,
@@ -350,7 +202,8 @@ public struct Sheet {
                     }
                     return false
                 }) else {
-                    fatalError("no placements in this preset") // otherwise we could run infinitely
+                    // don't run indefinitely
+                    fatalError("no placements in this arrangement")
                 }
                 var components: [Component] = layout.components(orderedBy: order)
                     .reversed() // reversed because we will be using popLast to empty the array
@@ -409,102 +262,248 @@ public struct Sheet {
         return pages
     }
 
-    public func images(type: ImageType, configuration: ImageConfiguration) throws {
-        switch type {
-        case let .individual(url):
-            try FileManager.default.createDirectory(
-                at: url,
-                withIntermediateDirectories: true,
-                attributes: nil
-            )
-
-            guard let renderTemplateUrl = Bundle.module.resourceURL?
-                .appendingPathComponent("templates/render/index.html"),
-                let renderTemplate = try? String(contentsOf: renderTemplateUrl, encoding: .utf8)
-            else {
-                return
-            }
-
-            let delegate = BrowserDelegate(
-                template: renderTemplate,
-                url: url,
-                resourceURL: bundle?.resourceURL,
-                components: configuration.components
-            )
-            delegate.dpi = configuration.dpi
-            delegate.renderNext()
-
-            let runLoop = RunLoop.current
-
-            while delegate.shouldKeepRunning,
-                  runLoop.run(mode: .default,
-                              before: .distantFuture) {}
-
-        case .tts(_):
-            fatalError("not implemented yet")
+    private func cutGuideGrid(page: Page, spacing: Measurement<UnitLength>) {
+        guard case let .component(c, _, _, _) = page.components.first else {
+            return
         }
-    }
 
-    public func document(type: DocumentType, configuration: DocumentConfiguration) throws {
-        switch type {
-        case let .web(url):
-            let pages = try organize(using: configuration)
+        let guideLength = 4.millimeters // distance beyond bounding box
 
-            let siteUrl = url.appendingPathComponent("site")
-            try? FileManager.default.createDirectory(
-                at: url,
-                withIntermediateDirectories: true,
-                attributes: nil
+        // determine whether we should produce cut guides on either side of component
+        // if there is no gap or bleed, we can get away with only producing left/top
+        // cut guides, plus an additional guide for the last row/column
+        // otherwise we need to produce cut guides for all edges of the component
+        let hasGap = spacing > 0.inches || c.innerRect.left > 0.inches
+        // note: assuming every component is identically sized on this page!
+        let b = page.boundingBox
+        let rows = Int(b.height.converted(to: .inches).value / c.portraitOrientedBounds.height
+                        .converted(to: .inches).value) + (hasGap ? 0 : 1)
+        let columns = Int(b.width.converted(to: .inches).value / c.portraitOrientedBounds.width
+                            .converted(to: .inches).value) + (hasGap ? 0 : 1)
+
+        // note that this also produce cut guides for empty slots
+        for row in 0 ..< rows {
+            let y = (c.portraitOrientedBounds.height * Double(row)) + (spacing * Double(row))
+
+            page.cut(
+                // top
+                x: 0.inches - guideLength, y: y + c.innerRect.top,
+                distance: b.width + guideLength * 2
             )
-            try? FileManager.default.removeItem(at: siteUrl)
-            guard let templateSiteUrl = Bundle.module.resourceURL?
-                .appendingPathComponent("templates/site")
-            else {
-                fatalError()
-            }
-            try FileManager.default.copyItem(at: templateSiteUrl, to: siteUrl)
-            if let assetsUrl = bundle?.resourceURL?.appendingPathComponent("assets") {
-                try FileManager.default.copyItem(
-                    at: assetsUrl, to: siteUrl.appendingPathComponent("assets")
+
+            if hasGap {
+                page.cut(
+                    // bottom
+                    x: 0.inches - guideLength,
+                    y: y + c.portraitOrientedBounds.height - c.innerRect.top,
+                    distance: b.width + guideLength * 2
                 )
             }
+        }
 
-            let indexUrl = siteUrl.appendingPathComponent("index.html")
-            let index = try String(contentsOf: indexUrl, encoding: .utf8)
+        for column in 0 ..< columns {
+            let x = (c.portraitOrientedBounds.width * Double(column)) + (spacing * Double(column))
 
-            let doc = Element.document(
-                template: index,
-                paper: configuration.paper,
-                pages: pages,
-                author: description?.author ?? "",
-                description: description?.copyright ?? "")
-            try doc.html.write(to: indexUrl, atomically: true, encoding: .utf8)
-
-            print("saved site at \(siteUrl)")
-
-        case let .pdf(url):
-            let tempUrl = URL(fileURLWithPath: NSTemporaryDirectory())
-                .appendingPathComponent("swift-boardgame-toolkit")
-            try FileManager.default.createDirectory(
-                at: tempUrl,
-                withIntermediateDirectories: true,
-                attributes: nil
+            page.cut(
+                // left
+                x: x + c.innerRect.left, y: 0.inches - guideLength,
+                distance: b.height + guideLength * 2,
+                vertically: true
             )
 
-            try document(type: .web(at: tempUrl), configuration: configuration)
-            let siteUrl = tempUrl.appendingPathComponent("site")
-
-            let delegate = BrowserDelegatePDF(destinationUrl: url)
-            delegate.paperSize = configuration.paper
-            try delegate.load(siteUrl: siteUrl)
-
-            let runLoop = RunLoop.current
-
-            while delegate.shouldKeepRunning,
-                  runLoop.run(mode: .default,
-                              before: .distantFuture) {}
-
-            try FileManager.default.removeItem(at: tempUrl) // clean up
+            if hasGap {
+                page.cut(
+                    // right
+                    x: x + c.portraitOrientedBounds.width - c.innerRect.left,
+                    y: 0.inches - guideLength,
+                    distance: b.height + guideLength * 2,
+                    vertically: true
+                )
+            }
         }
+    }
+}
+
+fileprivate extension Array where Element == Layout {
+    // if a layout contains mixed-size components, this splits the layouts up into separate,
+    // individual layouts, ultimately forcing page-breaks so that every page contains
+    // only one size of component
+    var splitBySize: [Layout] {
+        var sanitizedLayouts: [Layout] = []
+        for layout in self {
+            if case .custom = layout.method {
+                // don't mess with this type of layout; mixing sizes is allowed here
+                sanitizedLayouts.append(layout)
+                continue
+            }
+            var previousComponentSize: Size?
+            var collected: [Component] = []
+            var chunks: [[Component]] = []
+            for component in layout.components {
+                if let previousSize = previousComponentSize,
+                   previousSize.width != component.portraitOrientedBounds.width ||
+                    previousSize.height != component.portraitOrientedBounds.height
+                {
+                    chunks.append(collected)
+                    collected = []
+                }
+
+                collected.append(component)
+
+                previousComponentSize = component.portraitOrientedBounds
+            }
+            if !collected.isEmpty {
+                chunks.append(collected)
+                collected = []
+            }
+            for chunk in chunks {
+                sanitizedLayouts.append(Layout(chunk, method: layout.method))
+            }
+        }
+        return sanitizedLayouts
+    }
+}
+
+fileprivate extension Array where Element == Page {
+    func interleavedWithBackPages(layout: ([Component]) -> [Page]) -> [Page] {
+        var interleavedPages: [Page] = []
+        for page in self {
+            let components: [Component] = page.components.compactMap {
+                if case let .component(c, _, _, _) = $0 {
+                    return c
+                } else {
+                    return nil
+                }
+            }
+
+            guard let _ = components.first(where: { $0.back != nil }) else {
+                // at least one component on this page must have a back to proceed;
+                // otherwise append a blank page and skip to next
+                interleavedPages.append(page)
+                // for duplex printing, the number of pages must be even;
+                // i.e. we must interleave a blank piece of paper for the remaining
+                // back pages to print properly
+                interleavedPages.append(Page(size: page.bounds))
+                continue
+            }
+
+            var backs: [Component] = []
+            for component in components {
+                if let back = component.back {
+                    backs.append(back)
+                } else {
+                    backs.append(
+                        // empty back, sized to match
+                        Component(size: component.full.extent,
+                                  // bounds include bleed/trim already
+                                  bleed: 0.inches,
+                                  trim: 0.inches)
+                    )
+                }
+            }
+
+            let duplexedPages = layout(backs)
+            guard duplexedPages.count == 1, let backPage = duplexedPages.first else {
+                // if we somehow end up with more than one page, something went wrong
+                fatalError()
+            }
+
+            interleavedPages.append(page)
+            interleavedPages.append(backPage)
+        }
+        return interleavedPages
+    }
+}
+
+fileprivate extension Array where Element == Component {
+    func arrangedLeftToRight(
+        spacing: Measurement<UnitLength>,
+        on paper: Paper,
+        reverse: Bool = false,
+        applying cuts: @escaping (Page, Measurement<UnitLength>) -> Void
+    ) -> [Page] {
+        precondition(spacing.value >= 0)
+
+        var pages: [Page] = []
+
+        let origin = Size(width: 0.inches, height: 0.inches)
+
+        // in this context, x corresponds to the top-left corner of a component
+        var x = origin.width
+        var y = origin.height
+
+        var page = Page(size: paper.size)
+        var content: [(Size, Component)] = []
+
+        let pagebreak: (Bool) -> Void = { more in
+            var offsets: [Size] = []
+            for (offset, component) in content {
+                offsets.append(Size(width: offset.width, height: offset.height))
+                offsets.append(Size(width: offset.width + component.portraitOrientedBounds.width,
+                                    height: offset.width + component.portraitOrientedBounds.height))
+            }
+
+            let bb = Size.containingOffsets(offsets)
+
+            for (offset, component) in content {
+                if reverse {
+                    page.component(component,
+                                   x: bb.width - offset.width - component.portraitOrientedBounds
+                                    .width,
+                                   y: offset.height)
+                } else {
+                    page.component(component,
+                                   x: offset.width,
+                                   y: offset.height)
+                }
+            }
+
+            content = []
+            cuts(page, spacing)
+
+            pages.append(page)
+
+            if more {
+                page = Page(size: paper.size)
+                x = origin.width
+                y = origin.height
+            }
+        }
+
+        for component in self {
+            let offset = Size(width: x, height: y)
+
+            // temporarily store offset and component before laying out on page;
+            // this is necessary to, at pagebreak, determine actual position on page
+            // if we were always just laying out left-to-right, we would not have to do this
+            // and could put it on page immediately; however, to determine the relative origin
+            // for a layout flowing right-to-left, we have to first figure out just how wide
+            // the relative boundary actually is
+            content.append((offset, component))
+
+            // increment positions
+            x = offset.width + (component.portraitOrientedBounds.width + spacing)
+
+            let nextRightEdge = x + component.portraitOrientedBounds
+                .width // note using 'x', not offset.width
+            if nextRightEdge > paper.bounds.width {
+                // next line
+                x = origin.width
+                y = offset.height + (component.portraitOrientedBounds.height + spacing)
+            }
+
+            let nextBottomEdge = y + component.portraitOrientedBounds
+                .height // note using 'y', not offset.height
+            if nextBottomEdge > paper.bounds.height {
+                // next page
+                pagebreak(true)
+            }
+        }
+
+        if !content.isEmpty {
+            pagebreak(false)
+        }
+
+        return pages
     }
 }
