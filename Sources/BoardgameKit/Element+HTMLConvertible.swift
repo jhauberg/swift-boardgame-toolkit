@@ -292,12 +292,13 @@ extension Element: HTMLConvertible {
             style.set("top", value: y)
             style.set("left", value: x)
             // note using full extent here; i.e. including bleed
-            style.set("width", value: component.full.extent.width)
-            style.set("height", value: component.full.extent.height)
+            style.set("width", value: component.zone.full.extent.width)
+            style.set("height", value: component.zone.full.extent.height)
 
             let angle = rotation?.clockwiseOrientedRotation
 
-            let isLandscaped: Bool = component.full.extent.width > component.full.extent.height
+            let isLandscaped: Bool =
+                component.zone.full.extent.width > component.zone.full.extent.height
             let portraitBounds = component.portraitOrientedExtent
             let w = portraitBounds.width.converted(to: .inches).value
             let h = portraitBounds.height.converted(to: .inches).value

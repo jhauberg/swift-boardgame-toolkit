@@ -273,7 +273,7 @@ public struct Sheet {
         // if there is no gap or bleed, we can get away with only producing left/top
         // cut guides, plus an additional guide for the last row/column
         // otherwise we need to produce cut guides for all edges of the component
-        let hasGap = spacing > 0.inches || c.innerRect.left > 0.inches
+        let hasGap = spacing > 0.inches || c.zone.real.left > 0.inches
         // note: assuming every component is identically sized on this page!
         let b = page.boundingBox
         let rows = Int(b.height.converted(to: .inches).value / c.portraitOrientedExtent.height
@@ -287,7 +287,7 @@ public struct Sheet {
 
             page.cut(
                 // top
-                x: 0.inches - guideLength, y: y + c.innerRect.top,
+                x: 0.inches - guideLength, y: y + c.zone.real.top,
                 distance: b.width + guideLength * 2
             )
 
@@ -295,7 +295,7 @@ public struct Sheet {
                 page.cut(
                     // bottom
                     x: 0.inches - guideLength,
-                    y: y + c.portraitOrientedExtent.height - c.innerRect.top,
+                    y: y + c.portraitOrientedExtent.height - c.zone.real.top,
                     distance: b.width + guideLength * 2
                 )
             }
@@ -306,7 +306,7 @@ public struct Sheet {
 
             page.cut(
                 // left
-                x: x + c.innerRect.left, y: 0.inches - guideLength,
+                x: x + c.zone.real.left, y: 0.inches - guideLength,
                 distance: b.height + guideLength * 2,
                 vertically: true
             )
@@ -314,7 +314,7 @@ public struct Sheet {
             if hasGap {
                 page.cut(
                     // right
-                    x: x + c.portraitOrientedExtent.width - c.innerRect.left,
+                    x: x + c.portraitOrientedExtent.width - c.zone.real.left,
                     y: 0.inches - guideLength,
                     distance: b.height + guideLength * 2,
                     vertically: true
@@ -394,8 +394,8 @@ fileprivate extension Array where Element == Page {
                 } else {
                     backs.append(
                         // empty back, sized to match
-                        Component(size: component.full.extent,
-                                  // bounds include bleed/trim already
+                        Component(size: component.zone.full.extent,
+                                  // size include bleed/trim already
                                   bleed: 0.inches,
                                   trim: 0.inches)
                     )

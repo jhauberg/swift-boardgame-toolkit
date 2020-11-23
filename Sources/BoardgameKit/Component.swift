@@ -4,30 +4,26 @@ struct ComponentAttributes {
     var flip: Axis?
 }
 
-public struct BuilderContext {
-    public let full: Area // largest; i.e. with bleed
-    public let real: Area // mid; i.e. without bleed, but with trim
-    public let safe: Area // smallest; i.e. without bleed and trim
+public struct ZonedArea {
+    public let full: Area // largest area, before a cut; i.e. with bleed
+    public let real: Area // final area after a cut; i.e. without bleed, but with trim
+    public let safe: Area // smallest area, safely nested inside trim lines
 }
 
 // note that Component must be a class because it would otherwise
 // contain a recursive value type; i.e. `back`
 public final class Component: Dimensioned {
-    private(set) var extent: Size
-    
     private let trim: Distance
     private let bleed: Distance
 
-    let full: Area
-    let innerRect: Area
-    private let safeRect: Area
-
-    let portraitOrientedExtent: Size
-
+    private(set) var extent: Size
     private(set) var elements: [Element] = []
 
     private(set) var attributes = ComponentAttributes()
     private(set) var back: Component?
+
+    let zone: ZonedArea
+    let portraitOrientedExtent: Size
 
     /**
      Initializes a new boardgame component.
@@ -60,9 +56,14 @@ public final class Component: Dimensioned {
         portraitOrientedExtent = Size(width: min(bounds.width, bounds.height),
                                       height: max(bounds.width, bounds.height))
 
-        full = Area(extent: bounds)
-        innerRect = Area(inset: bleed, in: full)
-        safeRect = Area(inset: trim, in: innerRect)
+        let bledZone = Area(extent: bounds)
+        let trimZone = Area(inset: bleed, in: bledZone)
+        let safeZone = Area(inset: trim, in: trimZone)
+
+        zone = ZonedArea(
+            full: bledZone,
+            real: trimZone,
+            safe: safeZone)
     }
 
     /**
@@ -74,8 +75,8 @@ public final class Component: Dimensioned {
        - bleed: The distance extending outwards from the final, cut dimensions of the component.
        - trim: The distance extending inwards from the final, cut dimensions of the component.
        - form: The composition of elements that form the component.
-       - context: ...
-     - Returns: A fully-formed boardgame component, ready to be laid out on a page.
+       - zone: The zoned areas that make up the printed component.
+     - Returns: A fully-formed boardgame component, ready to be arranged on a page.
 
      Detailed description goes here.
      */
@@ -84,7 +85,7 @@ public final class Component: Dimensioned {
         height: Distance,
         bleed: Distance = 0.125.inches,
         trim: Distance = 0.125.inches,
-        @FeatureBuilder _ form: (_ context: BuilderContext) -> Feature? = { _ in
+        @FeatureBuilder _ form: (_ zone: ZonedArea) -> Feature? = { _ in
             nil
         }
     ) {
@@ -94,9 +95,7 @@ public final class Component: Dimensioned {
             trim: trim
         )
         if let elm =
-            form(BuilderContext(full: full,
-                                real: innerRect,
-                                safe: safeRect))
+            form(zone)
         {
             elements.append(
                 contentsOf: elm.elements()
@@ -104,7 +103,7 @@ public final class Component: Dimensioned {
         }
     }
 
-    public func backside(@FeatureBuilder _ form: (_ context: BuilderContext) -> Feature) -> Self {
+    public func backside(@FeatureBuilder _ form: (_ zone: ZonedArea) -> Feature) -> Self {
         back = Component(
             width: extent.width,
             height: extent.height,
@@ -141,7 +140,7 @@ public final class Component: Dimensioned {
         let cornerRadius = 0.125.inches
         let borderWidth = 0.5.millimeters
         let trimZone =
-            Box(covering: innerRect)
+            Box(covering: zone.real)
                 .border("crimson", width: borderWidth)
                 // note use of outer-border here; if we instead covered the bleed using a
                 // box with a wide border (inwards), then we could not cover the corner gap;
@@ -149,13 +148,13 @@ public final class Component: Dimensioned {
                 // we can solve this by exploiting box-shadow to add an "outer border" instead
                 // note that this border is likely to go beyond the bounds of the component
                 // but should just be clipped
-                .outline("rgba(220, 20, 60, 0.25)", width: innerRect.left + cornerRadius)
+            .outline("rgba(220, 20, 60, 0.25)", width: bleed + cornerRadius)
                 .corners(radius: cornerRadius)
                 .classed("do-not-print")
         elements.append(trimZone.element)
-        if safeRect.left > 0.inches {
+        if trim > 0.inches {
             let safeZone =
-                Box(covering: safeRect)
+                Box(covering: zone.safe)
                     .border("royalblue", width: borderWidth, style: "dashed")
                     .corners(radius: cornerRadius)
                     .classed("do-not-print")
