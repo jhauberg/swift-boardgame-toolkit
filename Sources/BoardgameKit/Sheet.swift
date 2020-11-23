@@ -18,10 +18,10 @@ public enum SheetError: Error {
     case notLaidOut(amount: Int)
 }
 
-public final class Sheet {
-    public final let description: SheetDescription?
+public struct Sheet {
+    public let description: SheetDescription?
 
-    final let bundle: Bundle?
+    let bundle: Bundle?
 
     public init(
         description: SheetDescription? = nil,
