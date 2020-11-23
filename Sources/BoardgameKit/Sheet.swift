@@ -18,6 +18,46 @@ public enum SheetError: Error {
     case notLaidOut(amount: Int)
 }
 
+extension Array where Element == Layout {
+    // if a layout contains mixed-size components, this splits the layouts up into separate,
+    // individual layouts, ultimately forcing page-breaks so that every page contains
+    // only one size of component
+    var splitBySize: [Layout] {
+        var sanitizedLayouts: [Layout] = []
+        for layout in self {
+            if case .custom = layout.method {
+                // don't mess with this type of layout; mixing sizes is allowed here
+                sanitizedLayouts.append(layout)
+                continue
+            }
+            var previousComponentSize: Size?
+            var collected: [Component] = []
+            var chunks: [[Component]] = []
+            for component in layout.components {
+                if let previousSize = previousComponentSize,
+                   previousSize.width != component.portraitOrientedBounds.width ||
+                    previousSize.height != component.portraitOrientedBounds.height
+                {
+                    chunks.append(collected)
+                    collected = []
+                }
+
+                collected.append(component)
+
+                previousComponentSize = component.portraitOrientedBounds
+            }
+            if !collected.isEmpty {
+                chunks.append(collected)
+                collected = []
+            }
+            for chunk in chunks {
+                sanitizedLayouts.append(Layout(chunk, method: layout.method))
+            }
+        }
+        return sanitizedLayouts
+    }
+}
+
 extension Array where Element == Page {
     func interleavedWithBackPages(layout: ([Component]) -> [Page]) -> [Page] {
         var interleavedPages: [Page] = []
@@ -235,45 +275,6 @@ public struct Sheet {
         return pages
     }
 
-    private func sanitize(layouts: [Layout]) -> [Layout] {
-        var sanitizedLayouts: [Layout] = []
-        for layout in layouts {
-            switch layout.method {
-            case .custom:
-                // don't mess with these; they should allow whatever is provided to them
-                // i.e. mixing sizes is possible only for these two particular methods
-                sanitizedLayouts.append(layout)
-                continue
-            default:
-                break
-            }
-            var previousComponentSize: Size?
-            var collected: [Component] = []
-            var chunks: [[Component]] = []
-            for component in layout.components {
-                if let previousSize = previousComponentSize,
-                   previousSize.width != component.portraitOrientedBounds.width ||
-                   previousSize.height != component.portraitOrientedBounds.height
-                {
-                    chunks.append(collected)
-                    collected = []
-                }
-
-                collected.append(component)
-
-                previousComponentSize = component.portraitOrientedBounds
-            }
-            if !collected.isEmpty {
-                chunks.append(collected)
-                collected = []
-            }
-            for chunk in chunks {
-                sanitizedLayouts.append(Layout(chunk, method: layout.method))
-            }
-        }
-        return sanitizedLayouts
-    }
-
     private func organize(using configuration: DocumentConfiguration) throws -> [Page] {
         let bounds = Size(
             width: configuration.paper.size.width - configuration.paper.margin.width * 2,
@@ -295,9 +296,7 @@ public struct Sheet {
 
         var pages: [Page] = []
 
-        let layouts = sanitize(layouts: configuration.layouts)
-
-        for layout in layouts {
+        for layout in configuration.layouts.splitBySize {
             switch layout.method {
             case let .natural(order, gap):
                 // natural layout is left-to-right
