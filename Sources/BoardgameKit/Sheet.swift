@@ -290,8 +290,8 @@ public final class Sheet {
 
                 pages.append(contentsOf: interleavedPages)
 
-            case let .fold(gap, separation):
-                break
+            case .fold(_, _):
+                fatalError("not implemented yet")
 
             case let .custom(order, arrangements):
                 guard let _ = arrangements.first(where: { arrangement -> Bool in
@@ -443,8 +443,8 @@ public final class Sheet {
                   runLoop.run(mode: .default,
                               before: .distantFuture) {}
 
-        case let .tts(url):
-            break
+        case .tts(_):
+            fatalError("not implemented yet")
         }
     }
 
