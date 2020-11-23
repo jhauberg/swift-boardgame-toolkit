@@ -473,25 +473,15 @@ public struct Sheet {
             }
 
             let indexUrl = siteUrl.appendingPathComponent("index.html")
-
-            var innerHtml = ""
-            for page in pages {
-                innerHtml += Element.page(page, margin: configuration.paper.margin).html
-            }
-
             let index = try String(contentsOf: indexUrl, encoding: .utf8)
-                .replacingOccurrences(of: "{{author}}", with: description?.author ?? "")
-                .replacingOccurrences(of: "{{description}}", with: description?.copyright ?? "")
-                .replacingOccurrences(
-                    of: "{{generator}}",
-                    with: "swift-boardgame-toolkit \(BoardgameKit.version)")
-                .replacingOccurrences(
-                    of: "{{page_dimensions}}",
-                    with: "\(configuration.paper.size.width) by \(configuration.paper.size.height)"
-                )
-                .replacingOccurrences(of: "{{pages}}", with: innerHtml)
 
-            try index.write(to: indexUrl, atomically: true, encoding: .utf8)
+            let doc = Element.document(
+                template: index,
+                paper: configuration.paper,
+                pages: pages,
+                author: description?.author ?? "",
+                description: description?.copyright ?? "")
+            try doc.html.write(to: indexUrl, atomically: true, encoding: .utf8)
 
             print("saved site at \(siteUrl)")
 

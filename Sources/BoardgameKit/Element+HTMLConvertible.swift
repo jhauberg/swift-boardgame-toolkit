@@ -390,6 +390,22 @@ extension Element: HTMLConvertible {
                 </div>\n
                 """
             }
+
+        case let .document(template, paper, pages, author, description):
+            let pageElements: [Element] = pages.map { .page($0, margin: paper.margin) }
+            let pagesHtml = pageElements.map(\.html).joined()
+
+            return template
+                .replacingOccurrences(of: "{{author}}", with: author)
+                .replacingOccurrences(of: "{{description}}", with: description)
+                .replacingOccurrences(
+                    of: "{{generator}}",
+                    with: "swift-boardgame-toolkit \(BoardgameKit.version)")
+                .replacingOccurrences(
+                    of: "{{page_dimensions}}",
+                    with: "\(paper.size.width) by \(paper.size.height)"
+                )
+                .replacingOccurrences(of: "{{pages}}", with: pagesHtml)
         }
     }
 }

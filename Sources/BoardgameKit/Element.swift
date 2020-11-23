@@ -31,6 +31,11 @@ enum Element {
                    x: Units,
                    y: Units,
                    turned: Layout.Turn? = nil)
-
-    case page(_ page: Page, margin: Margin)
+    case page(_ page: Page,
+              margin: Margin)
+    case document(template: String,
+                  paper: Paper,
+                  pages: [Page],
+                  author: String,
+                  description: String)
 }
