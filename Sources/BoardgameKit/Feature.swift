@@ -5,14 +5,14 @@ public protocol Feature {
 }
 
 extension Feature {
-    func flatten() -> [Feature] {
+    var flattened: [Feature] {
         var elms: [Feature] = []
         if let container = self as? Composite {
             for child in container.children {
-                elms.append(contentsOf: child.flatten())
+                elms.append(contentsOf: child.flattened)
             }
         } else if let body = form {
-            elms.append(contentsOf: body.flatten())
+            elms.append(contentsOf: body.flattened)
         } else {
             elms.append(self)
         }
@@ -22,7 +22,7 @@ extension Feature {
 
 extension Feature {
     func elements() -> [Element] {
-        flatten()
+        flattened
             .compactMap { $0 as? ElementConvertible }
             .map(\.element)
     }
