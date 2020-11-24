@@ -148,14 +148,14 @@ public final class Component: Dimensioned {
                 // we can solve this by exploiting box-shadow to add an "outer border" instead
                 // note that this border is likely to go beyond the bounds of the component
                 // but should just be clipped
-            .outline("rgba(220, 20, 60, 0.25)", width: bleed + cornerRadius)
+                .outline("rgba(220, 20, 60, 0.25)", width: bleed + cornerRadius)
                 .corners(radius: cornerRadius)
                 .classed("do-not-print")
         elements.append(trimZone.element)
         if trim > .zero {
             let safeZone =
                 Box(covering: zone.safe)
-                    .border("royalblue", width: borderWidth, style: "dashed")
+                    .border("royalblue", width: borderWidth, style: .dashed)
                     .corners(radius: cornerRadius)
                     .classed("do-not-print")
             elements.append(safeZone.element)

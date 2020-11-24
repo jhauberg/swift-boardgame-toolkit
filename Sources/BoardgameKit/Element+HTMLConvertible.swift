@@ -31,29 +31,42 @@ extension Element: HTMLConvertible {
                let borderWidth = attr.borderWidth,
                let borderEdges = attr.borderEdges
             {
+                let lineStyle: String
+                switch borderStyle {
+                case .solid:
+                    lineStyle = "solid"
+                case .dotted:
+                    lineStyle = "dotted"
+                case .dashed:
+                    lineStyle = "dashed"
+                case .groove:
+                    lineStyle = "groove"
+                case .double:
+                    lineStyle = "double"
+                }
                 if borderEdges == .all {
                     style.set("border", value: borderWidth)
-                    style.append("border", value: borderStyle)
+                    style.append("border", value: lineStyle)
                     style.append("border", value: borderColor)
                 } else {
                     if borderEdges.contains(.top) {
                         style.set("border-top", value: borderWidth)
-                        style.append("border-top", value: borderStyle)
+                        style.append("border-top", value: lineStyle)
                         style.append("border-top", value: borderColor)
                     }
                     if borderEdges.contains(.right) {
                         style.set("border-right", value: borderWidth)
-                        style.append("border-right", value: borderStyle)
+                        style.append("border-right", value: lineStyle)
                         style.append("border-right", value: borderColor)
                     }
                     if borderEdges.contains(.bottom) {
                         style.set("border-bottom", value: borderWidth)
-                        style.append("border-bottom", value: borderStyle)
+                        style.append("border-bottom", value: lineStyle)
                         style.append("border-bottom", value: borderColor)
                     }
                     if borderEdges.contains(.left) {
                         style.set("border-left", value: borderWidth)
-                        style.append("border-left", value: borderStyle)
+                        style.append("border-left", value: lineStyle)
                         style.append("border-left", value: borderColor)
                     }
                 }

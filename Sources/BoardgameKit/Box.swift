@@ -1,10 +1,18 @@
 import Foundation
 
+public enum BorderStyle {
+    case solid
+    case dotted
+    case dashed
+    case groove
+    case double
+}
+
 struct BoxAttributes {
     var backgroundColor: String?
     var borderWidth: Distance?
     var borderColor: String?
-    var borderStyle: String?
+    var borderStyle: BorderStyle?
     var borderRadius: Distance?
     var borderEdges: Edge?
 
@@ -71,7 +79,7 @@ public struct Box: Feature, Dimensioned {
     public func border(
         _ color: String,
         width: Distance = 1.millimeters,
-        style: String = "solid",
+        style: BorderStyle = .solid,
         edges: Edge = .all
     ) -> Self {
         var copy = self
