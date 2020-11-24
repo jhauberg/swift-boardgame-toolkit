@@ -32,6 +32,10 @@ public struct Sheet {
     }
 
     public func images(type: ImageType, configuration: ImageConfiguration) throws {
+        guard !configuration.components.isEmpty else {
+            print("warning: configuration did not provide any components; no images generated")
+            return
+        }
         switch type {
         case let .individual(url):
             try FileManager.default.createDirectory(
@@ -68,6 +72,10 @@ public struct Sheet {
     }
 
     public func document(type: DocumentType, configuration: DocumentConfiguration) throws {
+        guard !configuration.layouts.isEmpty else {
+            print("warning: configuration did not provide any layouts; document not generated")
+            return
+        }
         switch type {
         case let .web(url):
             let pages = try arrange(using: configuration)
