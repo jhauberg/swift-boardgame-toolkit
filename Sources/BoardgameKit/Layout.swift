@@ -2,7 +2,7 @@ import Foundation
 
 public struct Layout {
     public enum Method {
-        case natural(orderedBy: Order = .frontsThenBacks, Distance = .zero)
+        case natural(orderedBy: Order = .frontsThenBacks, gap: Distance = .zero)
         /**
          Double-sided printing.
 
