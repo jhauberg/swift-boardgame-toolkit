@@ -77,27 +77,27 @@ extension Image: Confinable {
 }
 
 extension Image: Insettable {
-    public func top(_ distance: Distance) -> Self {
+    public func top(_ inset: Distance) -> Self {
         var copy = self
-        copy.inset.top = distance
+        copy.inset.top = inset
         return copy
     }
 
-    public func left(_ distance: Distance) -> Self {
+    public func left(_ inset: Distance) -> Self {
         var copy = self
-        copy.inset.left = distance
+        copy.inset.left = inset
         return copy
     }
 
-    public func right(_ distance: Distance) -> Self {
+    public func right(_ inset: Distance) -> Self {
         var copy = self
-        copy.inset.right = distance
+        copy.inset.right = inset
         return copy
     }
 
-    public func bottom(_ distance: Distance) -> Self {
+    public func bottom(_ inset: Distance) -> Self {
         var copy = self
-        copy.inset.bottom = distance
+        copy.inset.bottom = inset
         return copy
     }
 }
