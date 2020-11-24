@@ -131,18 +131,13 @@ public struct Sheet {
     }
 
     private func arrange(using configuration: DocumentConfiguration) throws -> [Page] {
-        let bounds = Size(
-            width: configuration.paper.extent.width - configuration.paper.margin.width * 2,
-            height: configuration.paper.extent.height - configuration.paper.margin.height * 2
-        )
-
         let allComponents: [Component] = configuration.layouts.flatMap {
             $0.components(orderedBy: .frontsThenBacks)
         }
 
         if let component = allComponents.first(
-            where: { $0.portraitOrientedExtent.width > bounds.width ||
-                $0.portraitOrientedExtent.height > bounds.height
+            where: { $0.portraitOrientedExtent.width > configuration.paper.innerBounds.width ||
+                $0.portraitOrientedExtent.height > configuration.paper.innerBounds.height
             }
         ) {
             // a component won't fit on a page inside bounds
