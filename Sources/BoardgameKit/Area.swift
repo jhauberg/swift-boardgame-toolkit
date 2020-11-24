@@ -55,4 +55,13 @@ public struct Area: Dimensioned {
             in: area
         )
     }
+
+    public func inset(
+        top: Distance? = nil,
+        left: Distance? = nil,
+        right: Distance? = nil,
+        bottom: Distance? = nil
+    ) -> Area {
+        Area(top: top, left: left, right: right, bottom: bottom, in: self)
+    }
 }
