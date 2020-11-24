@@ -66,3 +66,9 @@ public extension Int {
         Measurement(value: Double(self), unit: .radians)
     }
 }
+
+public extension Measurement where UnitType: Dimension {
+    static var zero: Measurement {
+        return Measurement(value: 0, unit: .baseUnit())
+    }
+}

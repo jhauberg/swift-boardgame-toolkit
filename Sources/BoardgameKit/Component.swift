@@ -152,7 +152,7 @@ public final class Component: Dimensioned {
                 .corners(radius: cornerRadius)
                 .classed("do-not-print")
         elements.append(trimZone.element)
-        if trim > 0.inches {
+        if trim > .zero {
             let safeZone =
                 Box(covering: zone.safe)
                     .border("royalblue", width: borderWidth, style: "dashed")

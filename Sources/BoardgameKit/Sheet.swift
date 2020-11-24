@@ -281,7 +281,7 @@ public struct Sheet {
         // if there is no gap or bleed, we can get away with only producing left/top
         // cut guides, plus an additional guide for the last row/column
         // otherwise we need to produce cut guides for all edges of the component
-        let hasGap = spacing > 0.inches || c.zone.real.left > 0.inches
+        let hasGap = spacing > .zero || c.zone.real.left > .zero
         // note: assuming every component is identically sized on this page!
         let b = page.boundingBox
         let rows = Int(b.height.converted(to: .inches).value / c.portraitOrientedExtent.height
@@ -295,14 +295,14 @@ public struct Sheet {
 
             page.cut(
                 // top
-                x: 0.inches - guideLength, y: y + c.zone.real.top,
+                x: .zero - guideLength, y: y + c.zone.real.top,
                 distance: b.width + guideLength * 2
             )
 
             if hasGap {
                 page.cut(
                     // bottom
-                    x: 0.inches - guideLength,
+                    x: .zero - guideLength,
                     y: y + c.portraitOrientedExtent.height - c.zone.real.top,
                     distance: b.width + guideLength * 2
                 )
@@ -314,7 +314,7 @@ public struct Sheet {
 
             page.cut(
                 // left
-                x: x + c.zone.real.left, y: 0.inches - guideLength,
+                x: x + c.zone.real.left, y: .zero - guideLength,
                 distance: b.height + guideLength * 2,
                 vertically: true
             )
@@ -323,7 +323,7 @@ public struct Sheet {
                 page.cut(
                     // right
                     x: x + c.portraitOrientedExtent.width - c.zone.real.left,
-                    y: 0.inches - guideLength,
+                    y: .zero - guideLength,
                     distance: b.height + guideLength * 2,
                     vertically: true
                 )
@@ -404,8 +404,8 @@ fileprivate extension Array where Element == Page {
                         // empty back, sized to match
                         Component(size: component.zone.full.extent,
                                   // size include bleed/trim already
-                                  bleed: 0.inches,
-                                  trim: 0.inches)
+                                  bleed: .zero,
+                                  trim: .zero)
                     )
                 }
             }
@@ -434,7 +434,7 @@ fileprivate extension Array where Element == Component {
 
         var pages: [Page] = []
 
-        let origin = Size(width: 0.inches, height: 0.inches)
+        let origin = Size(width: .zero, height: .zero)
 
         // in this context, x corresponds to the top-left corner of a component
         var x = origin.width

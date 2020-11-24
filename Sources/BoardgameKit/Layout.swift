@@ -2,17 +2,15 @@ import Foundation
 
 public struct Layout {
     public enum Method {
-        case natural(orderedBy: Order = .frontsThenBacks, Distance = 0.inches)
+        case natural(orderedBy: Order = .frontsThenBacks, Distance = .zero)
         /**
          Double-sided printing.
 
          A gap can be specified to add spacing between each card, both horizontally and vertically.
          */
-        case duplex(gap: Distance = 0.inches)
-        case fold(
-            gap: Measurement<UnitLength> = 0.inches,
-            separation: Measurement<UnitLength> = 6.millimeters
-        )
+        case duplex(gap: Distance = .zero)
+        case fold(gap: Measurement<UnitLength> = .zero,
+                  separation: Measurement<UnitLength> = 6.millimeters)
 
         case custom(orderedBy: Order, _ arrangements: [Arrangement])
     }

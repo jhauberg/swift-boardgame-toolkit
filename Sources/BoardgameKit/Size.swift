@@ -4,7 +4,7 @@ public struct Size {
     public let width: Distance
     public let height: Distance
 
-    public static let zero = Size(width: 0.inches, height: 0.inches)
+    public static let zero = Size(width: .zero, height: .zero)
 
     static func containingOffsets(_ offsets: [Size]) -> Size {
         guard let minX = offsets.min(by: { $0.width < $1.width })?.width,

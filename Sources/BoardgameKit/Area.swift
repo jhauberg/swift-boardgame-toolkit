@@ -12,11 +12,10 @@ public struct Area: Dimensioned {
     public private(set) var bottom: Distance
 
     public init(extent: Size) {
-        let zero = 0.inches
-        top = zero
-        left = zero
-        right = zero
-        bottom = zero
+        top = .zero
+        left = .zero
+        right = .zero
+        bottom = .zero
         self.extent = extent
     }
 
@@ -27,12 +26,11 @@ public struct Area: Dimensioned {
         bottom: Distance? = nil,
         in area: Area
     ) {
-        let zero = 0.inches
         // default each edge if needed
-        self.top = top ?? zero
-        self.left = left ?? zero
-        self.right = right ?? zero
-        self.bottom = bottom ?? zero
+        self.top = top ?? .zero
+        self.left = left ?? .zero
+        self.right = right ?? .zero
+        self.bottom = bottom ?? .zero
         // determine extents before applying parent insets
         extent = Size(
             width: area.extent.width - (self.left + self.right),

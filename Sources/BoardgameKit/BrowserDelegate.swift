@@ -132,7 +132,7 @@ class BrowserDelegate: NSObject, WKNavigationDelegate {
             return
         }
 
-        let element: Element = .component(component, x: 0.inches, y: 0.inches)
+        let element: Element = .component(component, x: .zero, y: .zero)
         let renderHtml = template.replacingOccurrences(of: "{{component}}", with: element.html)
 
         let nativeDPI: Double = 96 // this is required to get correct sizing; see snapshot to apply desired dpi
