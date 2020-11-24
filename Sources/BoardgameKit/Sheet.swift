@@ -53,7 +53,7 @@ public struct Sheet {
                 resourceURL: bundle?.resourceURL,
                 components: configuration.components
             )
-            delegate.dpi = configuration.dpi
+            delegate.dpi = Double(configuration.dpi)
             delegate.renderNext()
 
             let runLoop = RunLoop.current

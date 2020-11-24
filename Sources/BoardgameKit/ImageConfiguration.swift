@@ -6,35 +6,38 @@ public enum ImageType {
 }
 
 public struct ImageConfiguration {
-    let dpi: Double
+    let dpi: Int
     let components: [Component]
 
-    public init(dpi: Double, components: [Component]) {
-        self.dpi = dpi
-        self.components = components
-    }
-
-    public init(dpi: Double, components: ArraySlice<Component>) {
-        self.init(dpi: dpi, components: Array(components))
+    public static func custom(dpi: Int, with components: [Component]) -> ImageConfiguration {
+        ImageConfiguration(dpi: dpi, components: components)
     }
 
     public static func print(with components: [Component]) -> ImageConfiguration {
-        ImageConfiguration(dpi: 300, components: components)
-    }
-
-    public static func print(with components: ArraySlice<Component>) -> ImageConfiguration {
-        print(with: Array(components))
-    }
-
-    public static func web(with components: [Component]) -> ImageConfiguration {
-        ImageConfiguration(dpi: 96, components: components)
+        custom(dpi: 300, with: components)
     }
 
     public static func regular(with components: [Component]) -> ImageConfiguration {
-        ImageConfiguration(dpi: 150, components: components)
+        custom(dpi: 150, with: components)
+    }
+
+    public static func web(with components: [Component]) -> ImageConfiguration {
+        custom(dpi: 96, with: components)
+    }
+
+    public static func custom(dpi: Int, with components: ArraySlice<Component>) -> ImageConfiguration {
+        custom(dpi: dpi, with: Array(components))
+    }
+
+    public static func print(with components: ArraySlice<Component>) -> ImageConfiguration {
+        self.print(with: Array(components))
     }
 
     public static func regular(with components: ArraySlice<Component>) -> ImageConfiguration {
         regular(with: Array(components))
+    }
+
+    public static func web(with components: ArraySlice<Component>) -> ImageConfiguration {
+        web(with: Array(components))
     }
 }

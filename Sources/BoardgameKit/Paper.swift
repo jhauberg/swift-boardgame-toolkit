@@ -18,19 +18,21 @@ public struct Paper: Dimensioned {
         self.margin = margin
     }
 
-    public static let letter = Paper(Size(width: 8.5.inches,
-                                          height: 11.inches),
-                                     Margin.common)
+    public static let letter = Paper(
+        Size(width: 8.5.inches,
+             height: 11.inches),
+        Margin.common)
 
-    public static let a4 = Paper(Size(width: 21.centimeters,
-                                      height: 29.7.centimeters),
-                                 Margin.common)
+    public static let a4 = Paper(
+        Size(width: 21.centimeters,
+             height: 29.7.centimeters),
+        Margin.common)
 
-    public var portrait: Paper {
+    var portrait: Paper {
         self
     }
 
-    public var landscape: Paper {
+    var landscape: Paper {
         Paper(
             Size(width: extent.height,
                  height: extent.width),
