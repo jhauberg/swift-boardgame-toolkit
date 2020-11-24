@@ -6,35 +6,44 @@ public struct Paper: Dimensioned {
     public let extent: Size
     public let margin: Margin
 
-    init(_ size: Size, _ margin: Margin) {
-        self.extent = size
-        self.margin = margin
-    }
-
     var innerBounds: Size {
         Size(width: extent.width - margin.width * 2,
              height: extent.height - margin.height * 2)
     }
 
-    public static let letter = Paper(Size(width: 21.59.centimeters,
-                                          height: 27.94.centimeters),
-                                     Margin(width: 9.75.millimeters,
-                                            height: 9.75.millimeters))
+    // note that a paper must be initialized portrait-oriented;
+    // landscape is produced by flipping the dimensions
+    public init(_ size: Size, _ margin: Margin) {
+        self.extent = size
+        self.margin = margin
+    }
+
+    public static let letter = Paper(Size(width: 8.5.inches,
+                                          height: 11.inches),
+                                     Margin.common)
 
     public static let a4 = Paper(Size(width: 21.centimeters,
                                       height: 29.7.centimeters),
-                                 Margin(width: 8.millimeters,
-                                        height: 8.millimeters))
+                                 Margin.common)
 
     public var portrait: Paper {
-        Paper(Size(width: min(extent.width, extent.height),
-                   height: max(extent.width, extent.height)),
-              margin)
+        self
     }
 
     public var landscape: Paper {
-        Paper(Size(width: max(extent.width, extent.height),
-                   height: min(extent.width, extent.height)),
-              margin)
+        Paper(
+            Size(width: extent.height,
+                 height: extent.width),
+            // note also flipping the vertical/horizontal margins
+            Margin(width: margin.height,
+                   height: margin.width)
+        )
+    }
+}
+
+extension Margin {
+    static var common: Margin {
+        Margin(width: 0.25.inches,
+               height: 0.25.inches)
     }
 }
