@@ -68,8 +68,7 @@ class BrowserDelegatePDF: NSObject, WKNavigationDelegate {
             let h: Double = paper.extent.height.converted(to: .inches).value * userSpaceDPI
 
             printInfo.paperSize = NSSize(
-                width: round(w),
-                height: round(h)
+                width: w, height: h
             )
         }
 
