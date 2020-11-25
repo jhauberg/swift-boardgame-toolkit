@@ -89,7 +89,8 @@ html, body {
   }
 
   .page {
-    border: 1mm dashed grey; /* todo: adjust this for best preview; it's not meant for printing, just to align- maybe make it red? */
+    /* Note that this seems to be required for page-breaks to apply as expected :shrug: */
+    border: 1mm dashed grey;
 
     overflow: hidden;
 
