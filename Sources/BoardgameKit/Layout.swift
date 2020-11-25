@@ -2,11 +2,26 @@ import Foundation
 
 public struct Layout {
     public enum Method {
-        case natural(orderedBy: Order = .frontsThenBacks, gap: Distance = .zero)
         /**
-         Double-sided printing.
+         Arrange components in order, allowing for single-sided printing (simplex printing).
 
          A gap can be specified to add spacing between each card, both horizontally and vertically.
+         */
+        case natural(orderedBy: Order = .frontsThenBacks, gap: Distance = .zero)
+        /**
+         Arrange components such that fronts and backs go on odd and even pages, respectively,
+         allowing for double-sided printing (duplex printing).
+
+         A gap can be specified to add spacing between each card, both horizontally and vertically.
+
+         For printers with a built-in duplexer (i.e. automatic double-sided printing),
+         make sure that the print job is setup for either long-edge or short-edge binding
+         for the paper orientation:
+
+           * Portrait: Long-edge binding
+           * Landscape: Short-edge binding
+
+         For manual duplexing, may God be with you.
          */
         case duplex(gap: Distance = .zero)
         case fold(gap: Measurement<UnitLength> = .zero,
