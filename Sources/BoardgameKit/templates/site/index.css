@@ -3,7 +3,7 @@ html, body {
   padding: 0;
 }
 
-.page {
+.page-frame {
   background: #fff;
 
   overflow: hidden;
@@ -60,7 +60,7 @@ html, body {
     background-color: #eee;
   }
 
-  .page {
+  .page-frame {
     margin: 1cm auto;
 
     box-shadow: 0 4px 5px rgba(75, 75, 75, 0.2);
@@ -88,7 +88,7 @@ html, body {
     display: none !important;
   }
 
-  .page {
+  .page-frame {
     /* Note that this seems to be required for page-breaks to apply as expected :shrug: */
     border: 1mm dashed grey;
 
@@ -104,7 +104,7 @@ html, body {
   }
 
   /* Except for the last .page element to avoid a blank ending page */
-  .page:last-child {
+  .page-frame:last-child {
     page-break-after: auto;
   }
 }

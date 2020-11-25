@@ -324,7 +324,7 @@ extension Element: HTMLConvertible {
                 style.append("padding", value: horizontalPadding)
                 return """
                 <div\
-                 class=\"page\"\
+                 class=\"page-frame\"\
                  style=\"\(style.css)\">
                 <div\
                  class=\"page-content\"\
@@ -346,7 +346,7 @@ extension Element: HTMLConvertible {
                 innerStyle.append("margin", value: "auto")
                 return """
                 <div\
-                 class=\"page\"\
+                 class=\"page-frame\"\
                  style=\"\(style.css)\">
                 <div\
                  class=\"page-content\"\
