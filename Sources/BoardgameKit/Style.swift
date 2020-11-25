@@ -29,11 +29,11 @@ struct Style {
     }
 
     mutating func set(_ key: String, value: Measurement<UnitLength>) {
-        set(key, value: "\(String(value.converted(to: .inches).value))in")
+        set(key, value: value.css)
     }
 
     mutating func append(_ key: String, value: Measurement<UnitLength>) {
-        append(key, value: "\(String(value.converted(to: .inches).value))in")
+        append(key, value: value.css)
     }
 }
 
@@ -42,5 +42,40 @@ extension Style: CSSConvertible {
         items.keys.sorted().map { key in
             "\(key): \(items[key]!)"
         }.joined(separator: "; ")
+    }
+}
+
+extension Measurement: CSSConvertible {
+    var css: String {
+        // to allow for the two extensions on UnitLength and UnitAngle;
+        // otherwise we'd have conflicting conformances
+        // (i.e. more than one `Measurement: CSSConvertible where ...`)
+        fatalError()
+    }
+}
+
+extension Measurement where UnitType == UnitLength {
+    var css: String {
+        switch unit {
+        case .inches:
+            return "\(value)in"
+        case .millimeters:
+            return "\(value)mm"
+        case .centimeters:
+            return "\(value)cm"
+        default:
+            return converted(to: .inches).css
+        }
+    }
+}
+
+extension Measurement where UnitType == UnitAngle {
+    var css: String {
+        switch unit {
+        case .degrees:
+            return "\(value)deg"
+        default:
+            return converted(to: .degrees).css
+        }
     }
 }

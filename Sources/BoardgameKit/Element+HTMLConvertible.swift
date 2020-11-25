@@ -85,7 +85,7 @@ extension Element: HTMLConvertible {
                 )
                 style.set(
                     "transform",
-                    value: "rotate(\(String(rotation.angle.converted(to: .degrees).value))deg)"
+                    value: "rotate(\(rotation.angle.css))"
                 )
             }
             return """
@@ -126,7 +126,7 @@ extension Element: HTMLConvertible {
                 )
                 style.set(
                     "transform",
-                    value: "rotate(\(String(rotation.angle.converted(to: .degrees).value))deg)"
+                    value: "rotate(\(rotation.angle.css))"
                 )
             }
             if let horizontalAlignment = attr.horizontalAlignment {
@@ -203,7 +203,7 @@ extension Element: HTMLConvertible {
                 )
                 style.set(
                     "transform",
-                    value: "rotate(\(String(rotation.angle.converted(to: .degrees).value))deg)"
+                    value: "rotate(\(rotation.angle.css))deg)"
                 )
             }
             if let mode = attr.mode {
@@ -264,8 +264,8 @@ extension Element: HTMLConvertible {
             let isLandscaped: Bool =
                 component.zone.full.extent.width > component.zone.full.extent.height
             let portraitBounds = component.portraitOrientedExtent
-            let w = portraitBounds.width.converted(to: .inches).value
-            let h = portraitBounds.height.converted(to: .inches).value
+            let w = portraitBounds.width.css
+            let h = portraitBounds.height.css
 
             style.set("transform-origin", value: "0% 0%")
 
@@ -274,23 +274,23 @@ extension Element: HTMLConvertible {
                 if isLandscaped {
                     // do nothing; natural position (landscape)
                 } else {
-                    style.set("transform", value: "translate(\(h)in, 0) rotate(90deg)")
+                    style.set("transform", value: "translate(\(h), 0) rotate(\(90.degrees.css)")
                 }
             case .twice:
                 if isLandscaped {
-                    style.set("transform", value: "translate(\(w)in, 0) rotate(90deg)")
+                    style.set("transform", value: "translate(\(w), 0) rotate(\(90.degrees.css)")
                 } else {
-                    style.set("transform", value: "translate(\(w)in, \(h)in) rotate(180deg)")
+                    style.set("transform", value: "translate(\(w), \(h)) rotate(\(180.degrees.css)")
                 }
             case .thrice:
                 if isLandscaped {
-                    style.set("transform", value: "translate(\(h)in, \(w)in) rotate(180deg)")
+                    style.set("transform", value: "translate(\(h), \(w)) rotate(\(180.degrees.css))")
                 } else {
-                    style.set("transform", value: "translate(0, \(w)in) rotate(270deg)")
+                    style.set("transform", value: "translate(0, \(w)) rotate(\(270.degrees.css))")
                 }
             case .none:
                 if isLandscaped {
-                    style.set("transform", value: "translate(0, \(h)in) rotate(-90deg)")
+                    style.set("transform", value: "translate(0, \(h)) rotate(\((-90).degrees.css))")
                 } else {
                     // do nothing; natural position (portrait)
                 }
