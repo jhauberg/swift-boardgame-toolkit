@@ -69,7 +69,8 @@ html, body {
 
 @media print {
   @page {
-    margin: 0 !important;
+      size: {{page_width}} {{page_height}};
+      margin: 0 !important;
   }
 
   html, body {

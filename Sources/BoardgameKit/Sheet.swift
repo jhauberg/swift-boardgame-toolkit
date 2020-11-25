@@ -110,6 +110,12 @@ public struct Sheet {
                 description: description?.copyright ?? "")
             try doc.html.write(to: indexUrl, atomically: true, encoding: .utf8)
 
+            let cssUrl = siteUrl.appendingPathComponent("index.css")
+            let css = try String(contentsOf: cssUrl, encoding: .utf8)
+                .replacingOccurrences(of: "{{page_width}}", with: configuration.paper.extent.width.css)
+                .replacingOccurrences(of: "{{page_height}}", with: configuration.paper.extent.height.css)
+            try css.write(to: cssUrl, atomically: true, encoding: .utf8)
+
             print("saved site at \(siteUrl)")
 
         case let .pdf(url):
