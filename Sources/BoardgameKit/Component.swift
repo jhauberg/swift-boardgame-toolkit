@@ -10,9 +10,7 @@ public struct ZonedArea {
     public let safe: Area // smallest area, safely nested inside trim lines
 }
 
-// note that Component must be a class because it would otherwise
-// contain a recursive value type; i.e. `back`
-public final class Component: Dimensioned {
+public struct Component: Dimensioned {
     private let trim: Distance
     private let bleed: Distance
 
@@ -20,7 +18,13 @@ public final class Component: Dimensioned {
     private(set) var elements: [Element] = []
 
     private(set) var attributes = ComponentAttributes()
-    private(set) var back: Component?
+    // using a property wrapper to allow for having a recursive type reference here
+    // see https://forums.swift.org/t/using-indirect-modifier-for-struct-properties/37600/18
+    // without it, Component would have to be a class; and that comes with other problems;
+    // for example, running any sheet output followed by a web output would cause
+    // overlays to appear twice (as these would be added every time the component
+    // was laid out on a page; which, in this case, happened twice)
+    @Indirect private(set) var back: Component?
 
     let zone: ZonedArea
     let portraitOrientedExtent: Size
@@ -80,7 +84,7 @@ public final class Component: Dimensioned {
 
      Detailed description goes here.
      */
-    public convenience init(
+    public init(
         width: Distance,
         height: Distance,
         bleed: Distance = 0.125.inches,
@@ -132,11 +136,13 @@ public final class Component: Dimensioned {
     }
 
     public func flipped(axis: Axis = .both) -> Self {
-        attributes.flip = axis
-        return self
+        var copy = self
+        copy.attributes.flip = axis
+        return copy
     }
 
     func withOverlays() -> Self {
+        var copy = self
         let cornerRadius = 0.125.inches
         let borderWidth = 0.5.millimeters
         let trimZone =
@@ -151,15 +157,24 @@ public final class Component: Dimensioned {
                 .outline("rgba(220, 20, 60, 0.25)", width: bleed + cornerRadius)
                 .corners(radius: cornerRadius)
                 .classed("do-not-print")
-        elements.append(trimZone.element)
+        copy.elements.append(trimZone.element)
         if trim > .zero {
             let safeZone =
                 Box(covering: zone.safe)
                     .border("royalblue", width: borderWidth, style: .dashed)
                     .corners(radius: cornerRadius)
                     .classed("do-not-print")
-            elements.append(safeZone.element)
+            copy.elements.append(safeZone.element)
         }
-        return self
+        return copy
     }
+}
+
+@propertyWrapper
+final class Indirect<Value> {
+    init(wrappedValue initialValue: Value) {
+        self.wrappedValue = initialValue
+    }
+
+    var wrappedValue: Value
 }
