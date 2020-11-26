@@ -274,13 +274,13 @@ extension Element: HTMLConvertible {
                 if isLandscaped {
                     // do nothing; natural position (landscape)
                 } else {
-                    style.set("transform", value: "translate(\(h), 0) rotate(\(90.degrees.css)")
+                    style.set("transform", value: "translate(\(h), 0) rotate(\(90.degrees.css))")
                 }
             case .twice:
                 if isLandscaped {
-                    style.set("transform", value: "translate(\(w), 0) rotate(\(90.degrees.css)")
+                    style.set("transform", value: "translate(\(w), 0) rotate(\(90.degrees.css))")
                 } else {
-                    style.set("transform", value: "translate(\(w), \(h)) rotate(\(180.degrees.css)")
+                    style.set("transform", value: "translate(\(w), \(h)) rotate(\(180.degrees.css))")
                 }
             case .thrice:
                 if isLandscaped {
