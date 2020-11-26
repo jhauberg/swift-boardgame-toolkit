@@ -69,6 +69,6 @@ public extension Int {
 
 public extension Measurement where UnitType: Dimension {
     static var zero: Measurement {
-        return Measurement(value: 0, unit: .baseUnit())
+        Measurement(value: 0, unit: .baseUnit())
     }
 }

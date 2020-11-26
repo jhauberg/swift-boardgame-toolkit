@@ -12,7 +12,7 @@ final class Page: Dimensioned {
     var elements: [Element] = []
 
     init(size: Size, mode: PageCoordinateSystem = .relativeToBoundingBox) {
-        self.extent = size
+        extent = size
         self.mode = mode
     }
 
@@ -42,8 +42,15 @@ final class Page: Dimensioned {
         rotatedBy rotation: Layout.Turn? = nil
     ) {
         elements.append(
-            // note that empty backs will also have overlays
-            .component(component.withOverlays().withMarks(style: .crosshair(color: "grey")), x: x, y: y, turned: rotation)
+            // note that empty backs will also have overlays/guides
+            .component(
+                component
+                    .withOverlays()
+                    .withMarks(style: .crosshair(color: "grey")),
+                x: x,
+                y: y,
+                turned: rotation
+            )
         )
     }
 

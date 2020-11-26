@@ -73,7 +73,8 @@ public struct Component: Dimensioned {
         zone = ZonedArea(
             full: bledZone,
             real: trimZone,
-            safe: safeZone)
+            safe: safeZone
+        )
     }
 
     /**
@@ -162,14 +163,17 @@ public struct Component: Dimensioned {
                 // but should just be clipped
                 .outline("rgba(220, 20, 60, 0.25)", width: bleed + cornerRadius)
                 .corners(radius: cornerRadius)
-                .classed("do-not-print").element)
+                .classed("do-not-print")
+                .element
+        )
         if trim > .zero {
             copy.elements.append(
                 Box(covering: zone.safe)
                     .border("royalblue", width: borderWidth, style: .dashed)
                     .corners(radius: cornerRadius)
                     .classed("do-not-print")
-                    .element)
+                    .element
+            )
         }
         return copy
     }
@@ -197,7 +201,8 @@ public struct Component: Dimensioned {
                 Box(covering: Area(inset: inset, in: zone.real))
                     .border(color, width: trimWidth, style: border, edges: .all)
                     .classed("guide")
-                    .element)
+                    .element
+            )
         case let .extendedEdges(color):
             let extent = 0.125.inches
             // set an additional distance to extend beyond the extent
@@ -206,24 +211,26 @@ public struct Component: Dimensioned {
             let reach = bleed
             copy.elements.append(
                 Box(covering:
-                        Area(top: inset,
-                             left: inset - extent - reach,
-                             right: inset - extent - reach,
-                             bottom: inset,
-                             in: zone.real))
+                    Area(top: inset,
+                         left: inset - extent - reach,
+                         right: inset - extent - reach,
+                         bottom: inset,
+                         in: zone.real))
                     .border(color, width: trimWidth, style: border, edges: [.top, .bottom])
                     .classed("guide")
-                    .element)
+                    .element
+            )
             copy.elements.append(
                 Box(covering:
-                        Area(top: inset - extent - reach,
-                             left: inset,
-                             right: inset,
-                             bottom: inset - extent - reach,
-                             in: zone.real))
+                    Area(top: inset - extent - reach,
+                         left: inset,
+                         right: inset,
+                         bottom: inset - extent - reach,
+                         in: zone.real))
                     .border(color, width: trimWidth, style: border, edges: [.left, .right])
                     .classed("guide")
-                    .element)
+                    .element
+            )
         case let .crosshair(color):
             let extent = 0.125.inches
             // set an additional distance to extend beyond the extent
@@ -237,14 +244,16 @@ public struct Component: Dimensioned {
                     .top(zone.real.top + inset)
                     .border(color, width: trimWidth, style: border, edges: [.top])
                     .classed("guide")
-                    .element)
+                    .element
+            )
             copy.elements.append(
                 Box(width: extent, height: (extent * 2) + reach)
                     .left(zone.real.left + inset)
                     .top(zone.real.top + inset - extent - reach)
                     .border(color, width: trimWidth, style: border, edges: .left)
                     .classed("guide")
-                    .element)
+                    .element
+            )
             // top-right
             copy.elements.append(
                 Box(width: (extent * 2) + reach, height: extent)
@@ -252,14 +261,16 @@ public struct Component: Dimensioned {
                     .top(zone.real.top + inset)
                     .border(color, width: trimWidth, style: border, edges: [.top])
                     .classed("guide")
-                    .element)
+                    .element
+            )
             copy.elements.append(
                 Box(width: extent, height: (extent * 2) + reach)
                     .right(zone.real.right + inset)
                     .top(zone.real.top + inset - extent - reach)
                     .border(color, width: trimWidth, style: border, edges: .right)
                     .classed("guide")
-                    .element)
+                    .element
+            )
             // bottom-left
             copy.elements.append(
                 Box(width: (extent * 2) + reach, height: extent)
@@ -267,14 +278,16 @@ public struct Component: Dimensioned {
                     .bottom(zone.real.bottom + inset)
                     .border(color, width: trimWidth, style: border, edges: [.bottom])
                     .classed("guide")
-                    .element)
+                    .element
+            )
             copy.elements.append(
                 Box(width: extent, height: (extent * 2) + reach)
                     .left(zone.real.left + inset)
                     .bottom(zone.real.bottom + inset - extent - reach)
                     .border(color, width: trimWidth, style: border, edges: .left)
                     .classed("guide")
-                    .element)
+                    .element
+            )
             // bottom-right
             copy.elements.append(
                 Box(width: (extent * 2) + reach, height: extent)
@@ -282,14 +295,16 @@ public struct Component: Dimensioned {
                     .bottom(zone.real.bottom + inset)
                     .border(color, width: trimWidth, style: border, edges: [.bottom])
                     .classed("guide")
-                    .element)
+                    .element
+            )
             copy.elements.append(
                 Box(width: extent, height: (extent * 2) + reach)
                     .right(zone.real.right + inset)
                     .bottom(zone.real.bottom + inset - extent - reach)
                     .border(color, width: trimWidth, style: border, edges: .right)
                     .classed("guide")
-                    .element)
+                    .element
+            )
         }
 
         return copy
@@ -303,7 +318,7 @@ public struct Component: Dimensioned {
 @propertyWrapper
 final class Indirect<Value> {
     init(wrappedValue initialValue: Value) {
-        self.wrappedValue = initialValue
+        wrappedValue = initialValue
     }
 
     var wrappedValue: Value

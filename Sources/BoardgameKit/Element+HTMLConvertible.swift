@@ -244,14 +244,15 @@ extension Element: HTMLConvertible {
 
             let isGuide: (_ element: Element) -> Bool = { elm in
                 guard case let .rect(_, _, _, additional) = elm,
-                      additional.classes.contains("guide") else {
+                      additional.classes.contains("guide")
+                else {
                     return false
                 }
                 return true
             }
 
-            // todo: consider treating overlays the same
-            // todo: consider whether guides should actually be _below_ content
+            // TODO: consider treating overlays the same
+            // TODO: consider whether guides should actually be _below_ content
             let guideElements = component.elements.filter(isGuide)
             let innerElements = component.elements.filter { !isGuide($0) }
 
@@ -381,7 +382,8 @@ extension Element: HTMLConvertible {
                 .replacingOccurrences(of: "{{description}}", with: description)
                 .replacingOccurrences(
                     of: "{{generator}}",
-                    with: "swift-boardgame-toolkit \(BoardgameKit.version)")
+                    with: "swift-boardgame-toolkit \(BoardgameKit.version)"
+                )
                 .replacingOccurrences(
                     of: "{{page_dimensions}}",
                     with: "\(paper.extent.width) by \(paper.extent.height)"

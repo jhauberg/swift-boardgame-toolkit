@@ -102,7 +102,10 @@ public struct Layout {
             distance: Distance,
             vertically: Bool = false
         ) -> Arrangement {
-            Arrangement(offset: Size(width: x, height: y), kind: .cut(distance: distance, vertically: vertically))
+            Arrangement(
+                offset: Size(width: x, height: y),
+                kind: .cut(distance: distance, vertically: vertically)
+            )
         }
 
         public static func fold(
@@ -111,7 +114,10 @@ public struct Layout {
             distance: Distance,
             vertically: Bool = false
         ) -> Arrangement {
-            Arrangement(offset: Size(width: x, height: y), kind: .fold(distance: distance, vertically: vertically))
+            Arrangement(
+                offset: Size(width: x, height: y),
+                kind: .fold(distance: distance, vertically: vertically)
+            )
         }
 
         public static func pagebreak() -> Arrangement {

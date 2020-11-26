@@ -14,19 +14,21 @@ public struct Paper: Dimensioned {
     // note that a paper must be initialized portrait-oriented;
     // landscape is produced by flipping the dimensions
     public init(_ size: Size, _ margin: Margin) {
-        self.extent = size
+        extent = size
         self.margin = margin
     }
 
     public static let letter = Paper(
         Size(width: 8.5.inches,
              height: 11.inches),
-        Margin.common)
+        Margin.common
+    )
 
     public static let a4 = Paper(
         Size(width: 21.centimeters,
              height: 29.7.centimeters),
-        Margin.common)
+        Margin.common
+    )
 
     var portrait: Paper {
         self

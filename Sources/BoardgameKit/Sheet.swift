@@ -66,7 +66,7 @@ public struct Sheet {
                   runLoop.run(mode: .default,
                               before: .distantFuture) {}
 
-        case .tts(_):
+        case .tts:
             fatalError("not implemented yet")
         }
     }
@@ -107,13 +107,18 @@ public struct Sheet {
                 paper: configuration.paper,
                 pages: pages,
                 author: description?.author ?? "",
-                description: description?.copyright ?? "")
+                description: description?.copyright ?? ""
+            )
             try doc.html.write(to: indexUrl, atomically: true, encoding: .utf8)
 
             let cssUrl = siteUrl.appendingPathComponent("index.css")
             let css = try String(contentsOf: cssUrl, encoding: .utf8)
-                .replacingOccurrences(of: "{{page_width}}", with: configuration.paper.extent.width.css)
-                .replacingOccurrences(of: "{{page_height}}", with: configuration.paper.extent.height.css)
+                .replacingOccurrences(
+                    of: "{{page_width}}", with: configuration.paper.extent.width.css
+                )
+                .replacingOccurrences(
+                    of: "{{page_height}}", with: configuration.paper.extent.height.css
+                )
             try css.write(to: cssUrl, atomically: true, encoding: .utf8)
 
             print("saved site at \(siteUrl)")
@@ -278,7 +283,7 @@ public struct Sheet {
     }
 }
 
-fileprivate extension Array where Element == Layout {
+private extension Array where Element == Layout {
     // if a layout contains mixed-size components, this splits the layouts up into separate,
     // individual layouts, ultimately forcing page-breaks so that every page contains
     // only one size of component
@@ -296,7 +301,7 @@ fileprivate extension Array where Element == Layout {
             for component in layout.components {
                 if let previousSize = previousComponentSize,
                    previousSize.width != component.portraitOrientedExtent.width ||
-                    previousSize.height != component.portraitOrientedExtent.height
+                   previousSize.height != component.portraitOrientedExtent.height
                 {
                     chunks.append(collected)
                     collected = []
@@ -318,7 +323,7 @@ fileprivate extension Array where Element == Layout {
     }
 }
 
-fileprivate extension Array where Element == Page {
+private extension Array where Element == Page {
     func interleavingBackPages(layout: ([Component]) -> [Page]) -> [Page] {
         var interleavedPages: [Page] = []
         for page in self {
@@ -363,7 +368,7 @@ fileprivate extension Array where Element == Page {
     }
 }
 
-fileprivate extension Array where Element == Component {
+private extension Array where Element == Component {
     func arrangedLeftToRight(
         spacing: Measurement<UnitLength>,
         on paper: Paper,
@@ -395,12 +400,12 @@ fileprivate extension Array where Element == Component {
             for (offset, component) in content {
                 if reverse {
                     page.arrange(component,
-                        x: bb.width - offset.width - component.portraitOrientedExtent.width,
-                        y: offset.height)
+                                 x: bb.width - offset.width - component.portraitOrientedExtent.width,
+                                 y: offset.height)
                 } else {
                     page.arrange(component,
-                        x: offset.width,
-                        y: offset.height)
+                                 x: offset.width,
+                                 y: offset.height)
                 }
             }
 
