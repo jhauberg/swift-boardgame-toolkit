@@ -182,7 +182,7 @@ public struct Sheet {
                     on: configuration.paper
                 )
 
-                let interleavedPages = laidOutPages.interleavedWithBackPages { backs in
+                let interleavedPages = laidOutPages.interleavingBackPages { backs in
                     backs.arrangedLeftToRight(
                         spacing: gap,
                         on: configuration.paper,
@@ -319,7 +319,7 @@ fileprivate extension Array where Element == Layout {
 }
 
 fileprivate extension Array where Element == Page {
-    func interleavedWithBackPages(layout: ([Component]) -> [Page]) -> [Page] {
+    func interleavingBackPages(layout: ([Component]) -> [Page]) -> [Page] {
         var interleavedPages: [Page] = []
         for page in self {
             let components: [Component] = page.components.compactMap {
