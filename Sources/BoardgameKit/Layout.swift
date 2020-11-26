@@ -5,14 +5,14 @@ public struct Layout {
         /**
          Arrange components in order, allowing for single-sided printing (simplex printing).
 
-         A gap can be specified to add spacing between each card, both horizontally and vertically.
+         A gap can be specified to add spacing between each component horizontally and vertically.
          */
         case natural(orderedBy: Order = .frontsThenBacks, gap: Distance = .zero)
         /**
          Arrange components such that fronts and backs go on odd and even pages, respectively,
          allowing for double-sided printing (duplex printing).
 
-         A gap can be specified to add spacing between each card, both horizontally and vertically.
+         A gap can be specified to add spacing between each component horizontally and vertically.
 
          For printers with a built-in duplexer (i.e. automatic double-sided printing),
          make sure that the print job is setup for either long-edge or short-edge binding
@@ -24,9 +24,23 @@ public struct Layout {
          For manual duplexing, may God be with you.
          */
         case duplex(gap: Distance = .zero)
-        case fold(gap: Measurement<UnitLength> = .zero,
-                  separation: Measurement<UnitLength> = 6.millimeters)
+        /**
+         Arrange components such that fronts and backs go on the same page, mirrored from a
+         folding line in the middle of the page.
 
+         A gap can be specified to add spacing between each component. Similarly, the distance
+         from the fold to the component can be adjusted.
+         */
+        case fold(gap: Distance = .zero, gutter: Distance = 6.millimeters)
+        /**
+         Arrange components in order, at pre-defined placements and orientations on a page.
+
+         This method is useful when you have very specific requirements for component arrangement.
+         Think of it as putting components into "slots" on a page.
+
+         For example, this could be used to match the arrangement of a specific die-cutter,
+         or to print on pre-cut/perforated paper.
+         */
         case custom(orderedBy: Order, _ arrangements: [Arrangement])
     }
 
