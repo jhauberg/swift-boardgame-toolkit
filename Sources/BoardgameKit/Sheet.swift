@@ -410,13 +410,7 @@ fileprivate extension Array where Element == Page {
                 if let back = component.back {
                     backs.append(back)
                 } else {
-                    backs.append(
-                        // empty back, sized to match
-                        Component(size: component.zone.full.extent,
-                                  // size include bleed/trim already
-                                  bleed: .zero,
-                                  trim: .zero)
-                    )
+                    backs.append(component.empty)
                 }
             }
 

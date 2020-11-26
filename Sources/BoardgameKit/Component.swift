@@ -280,6 +280,8 @@ public struct Component: Dimensioned {
         //        i.e. 0.26mm !
         //
         //   - much prefer keeping this code in here, but it might not be viable in the end
+    var empty: Component {
+        Component(size: extent, bleed: bleed, trim: trim)
     }
 }
 
