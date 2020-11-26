@@ -228,7 +228,6 @@ extension Element: HTMLConvertible {
             """
 
         case let .component(component, x, y, rotation):
-
             var contentStyle = Style()
 
             if let flip = component.attributes.flip {
@@ -243,13 +242,29 @@ extension Element: HTMLConvertible {
                 }
             }
 
-            let innerContent = component.elements.map(\.html).joined()
+            let isGuide: (_ element: Element) -> Bool = { elm in
+                guard case let .rect(_, _, _, additional) = elm,
+                      additional.classes.contains("guide") else {
+                    return false
+                }
+                return true
+            }
+
+            // todo: consider treating overlays the same
+            // todo: consider whether guides should actually be _below_ content
+            let guideElements = component.elements.filter(isGuide)
+            let innerElements = component.elements.filter { !isGuide($0) }
+
+            let innerContent = innerElements.map(\.html).joined()
+            let outerContent = guideElements.map(\.html).joined()
+
             let content = """
             <div\
              class=\"component-content\"\
              style=\"\(contentStyle.css)\">
             \(innerContent)\
             </div>\n
+            \(outerContent)
             """
 
             var style = Style()

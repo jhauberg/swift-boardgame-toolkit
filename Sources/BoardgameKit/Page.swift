@@ -43,7 +43,8 @@ final class Page: Dimensioned {
     ) {
         elements.append(
             // note that empty backs will also have overlays
-            .component(component.withOverlays(), x: x, y: y, turned: rotation)
+            // TODO: just check for .elements.isEmpty!
+            .component(component.withOverlays().withMarks(), x: x, y: y, turned: rotation)
         )
     }
 

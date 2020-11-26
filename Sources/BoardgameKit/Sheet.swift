@@ -201,7 +201,8 @@ public struct Sheet {
 
                 pages.append(contentsOf: interleavedPages)
 
-            case .fold(_, _):
+            case let .fold(gap, gutter):
+                let components = layout.components(orderedBy: .interleavingBacks)
                 fatalError("not implemented yet")
 
             case let .custom(order, arrangements):

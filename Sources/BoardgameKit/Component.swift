@@ -54,15 +54,15 @@ public struct Component: Dimensioned {
         self.bleed = bleed
         self.trim = trim
 
-        let bounds = Size(width: self.extent.width + bleed * 2,
-                          height: self.extent.height + bleed * 2)
+        let bounds = Size(width: self.extent.width + self.bleed * 2,
+                          height: self.extent.height + self.bleed * 2)
 
         portraitOrientedExtent = Size(width: min(bounds.width, bounds.height),
                                       height: max(bounds.width, bounds.height))
 
         let bledZone = Area(extent: bounds)
-        let trimZone = Area(inset: bleed, in: bledZone)
-        let safeZone = Area(inset: trim, in: trimZone)
+        let trimZone = Area(inset: self.bleed, in: bledZone)
+        let safeZone = Area(inset: self.trim, in: trimZone)
 
         zone = ZonedArea(
             full: bledZone,
@@ -167,6 +167,119 @@ public struct Component: Dimensioned {
             copy.elements.append(safeZone.element)
         }
         return copy
+    }
+
+    func withMarks() -> Self {
+        // method 1: boxed in
+//        var copy = self
+//        let trimWidth = 0.25.millimeters
+//        let inset = (trimWidth / 2) * -1
+//        let cutZone = Area(inset: inset, in: zone.real)
+//        let trimBox = Box(covering: cutZone)
+//            .border("grey", width: trimWidth, style: .dashed, edges: .all)
+//            .classed("guide")
+//        copy.elements.append(trimBox.element)
+//        return copy
+
+        // method 2: extended boxes
+//        var copy = self
+//        let trimWidth = 0.25.millimeters
+//        let inset = (trimWidth / 2) * -1
+//        let extended = 4.millimeters * -1
+//        copy.elements.append(
+//            Box(covering:
+//                    Area(top: inset,
+//                         left: inset + extended,
+//                         right: inset + extended,
+//                         bottom: inset,
+//                         in: zone.real))
+//                .border("grey", width: trimWidth, style: .dashed, edges: [.top, .bottom])
+//                .classed("guide").element)
+//        copy.elements.append(
+//            Box(covering:
+//                    Area(top: inset + extended,
+//                         left: inset,
+//                         right: inset,
+//                         bottom: inset + extended,
+//                         in: zone.real))
+//                .border("grey", width: trimWidth, style: .dashed, edges: [.left, .right])
+//                .classed("guide").element)
+//        return copy
+
+        // method 3: corner boxes
+        var copy = self
+        let trimWidth = 0.26.millimeters
+        let inset = (trimWidth / 2) * -1
+        let extent = 0.125.inches // same as corner radius // todo: though, should probably prefer to extend out further, to mitigate blend-in with full-bleed components
+        let style: BorderStyle = .dashed // todo: i prefer the aesthethic of dashed/dotted, but solid might be more practical
+        let reach = 0.millimeters
+        // top-left
+        copy.elements.append(
+            Box(width: (extent * 2) + reach, height: extent)
+                .left(zone.real.left + inset - extent - reach)
+                .top(zone.real.top + inset)
+                .border("red", width: trimWidth, style: style, edges: [.top])
+                .classed("guide").element)
+        copy.elements.append(
+            Box(width: extent, height: extent * 2)
+                .left(zone.real.left + inset)
+                .top(zone.real.top + inset - extent)
+                .border("red", width: trimWidth, style: style, edges: .left)
+                .classed("guide").element)
+        // top-right
+        copy.elements.append(
+            Box(width: extent * 2, height: extent)
+                .right(zone.real.right + inset - extent)
+                .top(zone.real.top + inset)
+                .border("red", width: trimWidth, style: style, edges: [.top])
+                .classed("guide").element)
+        copy.elements.append(
+            Box(width: extent, height: extent * 2)
+                .right(zone.real.right + inset)
+                .top(zone.real.top + inset - extent)
+                .border("red", width: trimWidth, style: style, edges: .right)
+                .classed("guide").element)
+        // bottom-left
+        copy.elements.append(
+            Box(width: extent * 2, height: extent)
+                .left(zone.real.left + inset - extent)
+                .bottom(zone.real.bottom + inset)
+                .border("red", width: trimWidth, style: style, edges: [.bottom])
+                .classed("guide").element)
+        copy.elements.append(
+            Box(width: extent, height: extent * 2)
+                .left(zone.real.left + inset)
+                .bottom(zone.real.bottom + inset - extent)
+                .border("red", width: trimWidth, style: style, edges: .left)
+                .classed("guide").element)
+        // bottom-right
+        copy.elements.append(
+            Box(width: extent * 2, height: extent)
+                .right(zone.real.right + inset - extent)
+                .bottom(zone.real.bottom + inset)
+                .border("red", width: trimWidth, style: style, edges: [.bottom])
+                .classed("guide").element)
+        copy.elements.append(
+            Box(width: extent, height: extent * 2)
+                .right(zone.real.right + inset)
+                .bottom(zone.real.bottom + inset - extent)
+                .border("red", width: trimWidth, style: style, edges: .right)
+                .classed("guide").element)
+        return copy
+
+        // note that, whichever method we use:
+        //   - we start seeing artifacts here because of rotation
+        //     this might even be a thing no matter which method we use; i.e. rounding errors
+        //     that inevitably occur at some point during the html->pdf process will cause
+        //     edges to be ever-so slightly off from lining up perfectly
+        //     this makes it less preferable to combine portrait and landscape cards
+        //     in this case, applying cut lines per-page is favorable, but of course, that method
+        //     is much less flexible and only works on grid-like layouts; e.g. _not_ on fold or custom
+        //     in practice, it might not be a big deal- it might not even be noticeable
+        //  edit: picking something closer to what maps to a pixel (in pdf space) could have an effect here;
+        //        i.e. 0.26mm !
+        //
+        //   - much prefer keeping this code in here, but it might not be viable in the end
     }
 }
 
