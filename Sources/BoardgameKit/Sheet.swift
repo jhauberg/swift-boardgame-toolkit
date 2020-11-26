@@ -168,8 +168,7 @@ public struct Sheet {
 
                 let laidOutPages = components.arrangedLeftToRight(
                     spacing: gap,
-                    on: configuration.paper,
-                    applying: cutGuideGrid
+                    on: configuration.paper
                 )
 
                 pages.append(contentsOf: laidOutPages)
@@ -180,16 +179,14 @@ public struct Sheet {
 
                 let laidOutPages = fronts.arrangedLeftToRight(
                     spacing: gap,
-                    on: configuration.paper,
-                    applying: cutGuideGrid
+                    on: configuration.paper
                 )
 
                 let interleavedPages = laidOutPages.interleavedWithBackPages { backs in
                     backs.arrangedLeftToRight(
                         spacing: gap,
                         on: configuration.paper,
-                        reverse: true,
-                        applying: cutGuideGrid
+                        reverse: true
                     )
                 }
 
@@ -278,67 +275,6 @@ public struct Sheet {
         }
 
         return pages
-    }
-
-    private func cutGuideGrid(page: Page, spacing: Measurement<UnitLength>) {
-        guard case let .component(c, _, _, _) = page.components.first else {
-            return
-        }
-
-        let guideLength = 4.millimeters // distance beyond bounding box
-
-        // determine whether we should produce cut guides on either side of component
-        // if there is no gap or bleed, we can get away with only producing left/top
-        // cut guides, plus an additional guide for the last row/column
-        // otherwise we need to produce cut guides for all edges of the component
-        let hasGap = spacing > .zero || c.zone.real.left > .zero
-        // note: assuming every component is identically sized on this page!
-        let b = page.boundingBox
-        let rows = Int(b.height.converted(to: .inches).value / c.portraitOrientedExtent.height
-                        .converted(to: .inches).value) + (hasGap ? 0 : 1)
-        let columns = Int(b.width.converted(to: .inches).value / c.portraitOrientedExtent.width
-                            .converted(to: .inches).value) + (hasGap ? 0 : 1)
-
-        // note that this also produce cut guides for empty slots
-        for row in 0 ..< rows {
-            let y = (c.portraitOrientedExtent.height * Double(row)) + (spacing * Double(row))
-
-            page.cut(
-                // top
-                x: .zero - guideLength, y: y + c.zone.real.top,
-                distance: b.width + guideLength * 2
-            )
-
-            if hasGap {
-                page.cut(
-                    // bottom
-                    x: .zero - guideLength,
-                    y: y + c.portraitOrientedExtent.height - c.zone.real.top,
-                    distance: b.width + guideLength * 2
-                )
-            }
-        }
-
-        for column in 0 ..< columns {
-            let x = (c.portraitOrientedExtent.width * Double(column)) + (spacing * Double(column))
-
-            page.cut(
-                // left
-                x: x + c.zone.real.left, y: .zero - guideLength,
-                distance: b.height + guideLength * 2,
-                vertically: true
-            )
-
-            if hasGap {
-                page.cut(
-                    // right
-                    x: x + c.portraitOrientedExtent.width - c.zone.real.left,
-                    y: .zero - guideLength,
-                    distance: b.height + guideLength * 2,
-                    vertically: true
-                )
-            }
-        }
     }
 }
 
@@ -431,8 +367,7 @@ fileprivate extension Array where Element == Component {
     func arrangedLeftToRight(
         spacing: Measurement<UnitLength>,
         on paper: Paper,
-        reverse: Bool = false,
-        applying cuts: @escaping (Page, Measurement<UnitLength>) -> Void
+        reverse: Bool = false
     ) -> [Page] {
         precondition(spacing.value >= 0)
 
@@ -470,7 +405,6 @@ fileprivate extension Array where Element == Component {
             }
 
             content = []
-            cuts(page, spacing)
 
             pages.append(page)
 
