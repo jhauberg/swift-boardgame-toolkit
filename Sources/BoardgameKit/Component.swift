@@ -6,6 +6,13 @@ enum GuideStyle {
     case crosshair(color: String)
 }
 
+public enum GuideDistribution {
+    case front
+    case back
+    case frontAndBack
+    case none
+}
+
 struct ComponentAttributes {
     var flip: Axis?
 }

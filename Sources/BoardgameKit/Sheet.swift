@@ -169,7 +169,11 @@ public struct Sheet {
             switch layout.method {
             case let .natural(order, gap):
                 // natural layout is left-to-right
-                let components = layout.components(orderedBy: order)
+                let components = layout.components(orderedBy: order).map { component in
+                    component
+                        .withOverlays()
+                        .withMarks(style: .crosshair(color: "grey"))
+                }
 
                 let laidOutPages = components.arrangedLeftToRight(
                     spacing: gap,
@@ -177,18 +181,40 @@ public struct Sheet {
                 )
 
                 pages.append(contentsOf: laidOutPages)
-            case let .duplex(gap):
+                
+            case let .duplex(gap, guides):
                 // similar to natural layout, except backs are reversed (i.e. right-to-left)
                 // and separated to interleaved pages
-                let fronts = layout.components
+                let fronts: [Component] = layout.components.map { component in
+                    let front = component.withOverlays()
+                    switch guides {
+                    case .front,
+                         .frontAndBack:
+                        return front.withMarks(style: .crosshair(color: "grey"))
+                    case .back,
+                         .none:
+                        return front
+                    }
+                }
 
                 let laidOutPages = fronts.arrangedLeftToRight(
                     spacing: gap,
                     on: configuration.paper
                 )
 
-                let interleavedPages = laidOutPages.interleavingBackPages { backs in
-                    backs.arrangedLeftToRight(
+                let interleavedPages = laidOutPages.interleavingBackPages { components in
+                    let backs: [Component] = components.map { component in
+                        let back = component.withOverlays()
+                        switch guides {
+                        case .back,
+                             .frontAndBack:
+                            return back.withMarks(style: .crosshair(color: "grey"))
+                        case .front,
+                             .none:
+                            return back
+                        }
+                    }
+                    return backs.arrangedLeftToRight(
                         spacing: gap,
                         on: configuration.paper,
                         reverse: true
@@ -238,7 +264,9 @@ public struct Sheet {
                                 continue
                             }
                             page.arrange(
-                                component,
+                                component
+                                    .withOverlays()
+                                    .withMarks(style: .crosshair(color: "grey")),
                                 x: offset.width,
                                 y: offset.height,
                                 rotatedBy: rotation

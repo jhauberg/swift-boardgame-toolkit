@@ -23,7 +23,7 @@ public struct Layout {
 
          For manual duplexing, may God be with you.
          */
-        case duplex(gap: Distance = .zero)
+        case duplex(gap: Distance = .zero, guides: GuideDistribution = .back)
         /**
          Arrange components such that fronts and backs go on the same page, mirrored from a
          folding line in the middle of the page.
