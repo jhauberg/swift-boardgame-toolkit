@@ -203,8 +203,8 @@ public struct Sheet {
                 )
 
                 let interleavedPages = laidOutPages.interleavingBackPages { components in
-                    let backs: [Component] = components.map { component in
-                        let back = component.withOverlays()
+                    let backs: [Component] = components.map { back in
+                        // note that non-empty backs already have overlays applied at this point
                         switch guides {
                         case .back,
                              .frontAndBack:
@@ -229,9 +229,87 @@ public struct Sheet {
 
                 pages.append(contentsOf: interleavedPages)
 
-            case let .fold(gap, gutter):
-                let components = layout.components(orderedBy: .interleavingBacks)
-                fatalError("not implemented yet")
+            case let .fold(gap, gutter, guides):
+                let fronts: [Component] = layout.components(orderedBy: .skippingBacks).map { component in
+                    let front = component.withOverlays()
+                    switch guides {
+                    case .front,
+                         .frontAndBack:
+                        return front.withMarks(style: .crosshair(color: "grey"))
+                    case .back,
+                         .none:
+                        return front
+                    }
+                }
+
+                guard let ref = fronts.first else {
+                    fatalError()
+                }
+
+                // determine the upper part of the paper in which we can layout components
+                // note that the extent of this boundary does not go from bleed edge to fold,
+                // but from trim edge to fold; i.e. there may be less distance from bleed to
+                // fold than what is specified by `gutter`; this is intentional
+                let boundedSize = Size(
+                    width: configuration.paper.innerBounds.width,
+                    height:
+                        (configuration.paper.innerBounds.height / 2) -
+                        (gutter + ref.zone.real.bottom)
+                )
+
+                guard ref.portraitOrientedExtent.width <= boundedSize.width,
+                      ref.portraitOrientedExtent.height <= boundedSize.height else {
+                    // not enough space to put even a single component onto paper
+                    // given paper margin, component size and gutter distance
+                    fatalError()
+                }
+
+                // layout components in "pages" based on a marginless paper specification
+                // exactly fitting the previously determined boundaries
+                let upperPages = fronts.arrangedLeftToRight(
+                    spacing: gap, on: Paper(boundedSize, .zero))
+
+                for arrangedPage in upperPages {
+                    let page = Page(size: configuration.paper.extent)
+                    let b = arrangedPage.boundingBox
+                    let foldOffset = b.height - ref.zone.real.bottom + gutter
+
+                    page.fold(
+                        // add a fold guide going across the entire paper, inside margins
+                        x: .zero - ((configuration.paper.innerBounds.width / 2) - (b.width / 2)),
+                        // note that Fold adjusts to center itself on the coordinate
+                        // so we don't have to take that into account here
+                        y: foldOffset,
+                        distance: configuration.paper.innerBounds.width,
+                        vertically: false
+                    )
+
+                    for case let .component(component, x, y, r) in arrangedPage.elements {
+                        page.arrange(component, x: x, y: y, rotatedBy: r)
+                        var back = component.back?.withOverlays() ?? component.empty
+                        switch guides {
+                        case .back,
+                             .frontAndBack:
+                            back = back.withMarks(style: .crosshair(color: "grey"))
+                        case .front,
+                             .none:
+                            break
+                        }
+                        let turns: Layout.Turn?
+                        if component.zone.full.extent.height > component.zone.full.extent.width {
+                            // flip portrait-oriented components vertically so that
+                            // they fold on the bottom edge
+                            turns = .cw(.twice)
+                        } else {
+                            // don't flip landscape-oriented components;
+                            // these fold on left/right edges and end up in same orientation
+                            turns = nil
+                        }
+                        page.arrange(back, x: x, y: (y + foldOffset - ref.zone.real.bottom) + gutter, rotatedBy: turns)
+                    }
+
+                    pages.append(page)
+                }
 
             case let .custom(order, arrangements):
                 guard let _ = arrangements.first(where: { arrangement -> Bool in
@@ -377,7 +455,7 @@ private extension Array where Element == Page {
             var backs: [Component] = []
             for component in components {
                 if let back = component.back {
-                    backs.append(back)
+                    backs.append(back.withOverlays())
                 } else {
                     backs.append(component.empty)
                 }
@@ -462,16 +540,16 @@ private extension Array where Element == Component {
             // increment positions
             x = offset.width + (component.portraitOrientedExtent.width + spacing)
 
-            let nextRightEdge = x + component.portraitOrientedExtent
-                .width // note using 'x', not offset.width
+            // note using 'x', not offset.width
+            let nextRightEdge = x + component.portraitOrientedExtent.width
             if nextRightEdge > paper.innerBounds.width {
                 // next line
                 x = origin.width
                 y = offset.height + (component.portraitOrientedExtent.height + spacing)
             }
 
-            let nextBottomEdge = y + component.portraitOrientedExtent
-                .height // note using 'y', not offset.height
+            // note using 'y', not offset.height
+            let nextBottomEdge = y + component.portraitOrientedExtent.height
             if nextBottomEdge > paper.innerBounds.height {
                 // next page
                 pagebreak(true)

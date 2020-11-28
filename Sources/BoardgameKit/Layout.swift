@@ -14,6 +14,8 @@ public struct Layout {
 
          A gap can be specified to add spacing between each component horizontally and vertically.
 
+         # Printing
+
          For printers with a built-in duplexer (i.e. automatic double-sided printing),
          make sure that the print job is setup for either long-edge or short-edge binding
          for the paper orientation:
@@ -26,19 +28,34 @@ public struct Layout {
         case duplex(gap: Distance = .zero, guides: GuideDistribution = .back)
         /**
          Arrange components such that fronts and backs go on the same page, mirrored from a
-         folding line in the middle of the page.
+         folding line going through the middle of the page.
 
-         A gap can be specified to add spacing between each component. Similarly, the distance
-         from the fold to the component can be adjusted.
+         A gap can be specified to add spacing between each component.
+
+         The gutter is the distance from the fold, to the trim of each component;
+         i.e. not including bleed.
+
+         # Printing
+
+         For best results and most accurate front/back alignment, make sure to fold so that
+         the fold guide is visible on the crease/bulge of the paper.
+
+         The fold can not be guaranteed to be perfectly centered in the middle of the page,
+         so going by aligning the paper corners will not always be accurate.
+
+         If your printer has large margins, consider reducing the bleed or folding gutter.
          */
-        case fold(gap: Distance = .zero, gutter: Distance = 6.millimeters)
+        case fold(gap: Distance = .zero, gutter: Distance = 6.millimeters, guides: GuideDistribution = .back)
         /**
          Arrange components in order, at pre-defined placements and orientations on a page.
 
-         This method is useful when you have very specific requirements for component arrangement.
-         Think of it as putting components into "slots" on a page.
+         This is useful when you have specific requirements for component arrangement.
 
-         For example, this could be used to match the arrangement of a specific die-cutter,
+         This method can be considered as a sort of _Bring Your Own Layout_ (BYOL) that allows for
+         precise arrangement of components, cut and fold guides.
+         You can think of it as putting "slots" on a page that components are put into.
+
+         For example, this could be used to match the layout of a specific die-cutter,
          or to print on pre-cut/perforated paper.
          */
         case custom(orderedBy: Order, _ arrangements: [Arrangement])

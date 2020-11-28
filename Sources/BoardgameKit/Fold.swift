@@ -30,7 +30,7 @@ struct Fold: Feature {
         Box(width: bounds.width, height: bounds.height)
             .top(offset.height)
             .left(offset.width)
-            .border("grey", width: width, style: .dotted, edges: edges)
+            .border("grey", width: width, style: .dashed, edges: edges)
             .classed("guide")
     }
 }
