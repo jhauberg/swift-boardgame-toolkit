@@ -322,10 +322,9 @@ extension Element: HTMLConvertible {
 
         case let .page(page, margin):
             // hack: reduce height slightly to avoid overflow (e.g. "blank" pages)
-            // it can be higher or lower; there's no specific distance that is correct,
-            // but as low as possible without introducing overflow is preferable;
-            // the distance required can vary from browser to browser
-            let h = page.extent.height - 0.25.millimeters
+            // this value is precisely set to what most closely maps to 1 pixel in browser space
+            let tweak = 1.inches / 96
+            let adjustedPageHeight = page.extent.height - tweak
 
             let content = page.elements.map(\.html).joined()
 
@@ -335,7 +334,7 @@ extension Element: HTMLConvertible {
                 let verticalPadding = margin.height
                 var style = Style()
                 style.set("width", value: page.extent.width)
-                style.set("height", value: h)
+                style.set("height", value: adjustedPageHeight)
                 style.set("padding", value: verticalPadding)
                 style.append("padding", value: horizontalPadding)
                 return """
@@ -351,10 +350,18 @@ extension Element: HTMLConvertible {
                 """
             case .relativeToBoundingBox:
                 let inner = page.boundingBox
-                let verticalMargin = (h - inner.height) / 2
+                // see templates/index.css:.page-frame border, both must match
+                let alignmentBorderWidth = 1.millimeters
+                // this margin takes into account the alignment border on the inside of the page
+                // and the tweaked adjustment of page height (by 1 pixel)
+                // this ensures more accurate centering on the final product
+                // without the adjustments, the result would have more top margin
+                // than bottom margin, making it noticeably less centered than expected
+                // (important for layout methods like gutter-fold, less so for most other)
+                let verticalMargin = ((adjustedPageHeight - inner.height) / 2) - alignmentBorderWidth + (tweak / 2)
                 var style = Style()
                 style.set("width", value: page.extent.width)
-                style.set("height", value: h)
+                style.set("height", value: adjustedPageHeight)
                 var innerStyle = Style()
                 innerStyle.set("width", value: inner.width)
                 innerStyle.set("height", value: inner.height)
