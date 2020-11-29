@@ -251,8 +251,6 @@ extension Element: HTMLConvertible {
                 return true
             }
 
-            // TODO: consider treating overlays the same
-            // TODO: consider whether guides should actually be _below_ content
             let guideElements = component.elements.filter(isGuide)
             let innerElements = component.elements.filter { !isGuide($0) }
 
