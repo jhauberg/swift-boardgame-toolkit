@@ -169,18 +169,18 @@ public struct Sheet {
             switch layout.method {
             case let .natural(order, gap):
                 // natural layout is left-to-right
-                let components = layout.components(orderedBy: order).map { component in
+                let fronts = layout.components(orderedBy: order).map { component in
                     // note that every component is considered to be a front
                     // in this layout method
                     component.front(with: .front)
                 }
 
-                let laidOutPages = components.arrangedLeftToRight(
+                let frontPages = fronts.arrangedLeftToRight(
                     spacing: gap,
                     on: configuration.paper
                 )
 
-                pages.append(contentsOf: laidOutPages)
+                pages.append(contentsOf: frontPages)
                 
             case let .duplex(gap, guides):
                 // similar to natural layout, except backs are reversed (i.e. right-to-left)
