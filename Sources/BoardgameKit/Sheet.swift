@@ -252,9 +252,10 @@ public struct Sheet {
                 // fold than what is specified by `gutter`; this is intentional
                 let boundedSize = Size(
                     width: configuration.paper.innerBounds.width,
-                    height:
-                        (configuration.paper.innerBounds.height / 2) -
-                        (gutter + ref.zone.real.bottom)
+                    height: (
+                        ((configuration.paper.innerBounds.height / 2) - gutter) +
+                            ref.zone.real.bottom
+                    )
                 )
 
                 guard ref.portraitOrientedExtent.width <= boundedSize.width,
