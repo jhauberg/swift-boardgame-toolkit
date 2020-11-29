@@ -170,9 +170,9 @@ public struct Sheet {
             case let .natural(order, gap):
                 // natural layout is left-to-right
                 let components = layout.components(orderedBy: order).map { component in
-                    component
-                        .withOverlays()
-                        .withMarks(style: .crosshair(color: "grey"))
+                    // note that every component is considered to be a front
+                    // in this layout method
+                    component.front(with: .front)
                 }
 
                 let laidOutPages = components.arrangedLeftToRight(
@@ -185,61 +185,38 @@ public struct Sheet {
             case let .duplex(gap, guides):
                 // similar to natural layout, except backs are reversed (i.e. right-to-left)
                 // and separated to interleaved pages
-                let fronts: [Component] = layout.components.map { component in
-                    let front = component.withOverlays()
-                    switch guides {
-                    case .front,
-                         .frontAndBack:
-                        return front.withMarks(style: .crosshair(color: "grey"))
-                    case .back,
-                         .none:
-                        return front
-                    }
+                let fronts = layout.components.map { component in
+                    component.front(with: guides)
                 }
 
-                let laidOutPages = fronts.arrangedLeftToRight(
+                let frontPages = fronts.arrangedLeftToRight(
                     spacing: gap,
                     on: configuration.paper
                 )
 
-                let interleavedPages = laidOutPages.interleavingBackPages { components in
-                    let backs: [Component] = components.map { back in
-                        // note that non-empty backs already have overlays applied at this point
-                        switch guides {
-                        case .back,
-                             .frontAndBack:
-                            return back.withMarks(style: .crosshair(color: "grey"))
-                        case .front,
-                             .none:
-                            return back
-                        }
-                    }
-                    return backs.arrangedLeftToRight(
-                        spacing: gap,
-                        on: configuration.paper,
-                        reverse: true
-                    )
+                let backs = fronts.map { front in
+                    front.back(with: guides)
                 }
+
+                let backPages = backs.arrangedLeftToRight(
+                    spacing: gap,
+                    on: configuration.paper,
+                    reverse: true
+                )
+
+                let interleavedPages = frontPages.interleaved(with: backPages)
 
                 if interleavedPages.count % 2 != 0 {
                     // duplex printing requires an even number of pages;
-                    // for every page of fronts a page of backs must follow
+                    // for every page of fronts, a page of backs must follow
                     fatalError()
                 }
 
                 pages.append(contentsOf: interleavedPages)
 
             case let .fold(gap, gutter, guides):
-                let fronts: [Component] = layout.components(orderedBy: .skippingBacks).map { component in
-                    let front = component.withOverlays()
-                    switch guides {
-                    case .front,
-                         .frontAndBack:
-                        return front.withMarks(style: .crosshair(color: "grey"))
-                    case .back,
-                         .none:
-                        return front
-                    }
+                let fronts = layout.components.map { component in
+                    component.front(with: guides)
                 }
 
                 guard let ref = fronts.first else {
@@ -287,15 +264,7 @@ public struct Sheet {
 
                     for case let .component(component, x, y, r) in arrangedPage.elements {
                         page.arrange(component, x: x, y: y, rotatedBy: r)
-                        var back = component.back?.withOverlays() ?? component.empty
-                        switch guides {
-                        case .back,
-                             .frontAndBack:
-                            back = back.withMarks(style: .crosshair(color: "grey"))
-                        case .front,
-                             .none:
-                            break
-                        }
+                        let back = component.back(with: guides)
                         let turns: Layout.Turn?
                         if component.zone.full.extent.height > component.zone.full.extent.width {
                             // flip portrait-oriented components vertically so that
@@ -343,9 +312,9 @@ public struct Sheet {
                                 continue
                             }
                             page.arrange(
-                                component
-                                    .withOverlays()
-                                    .withMarks(style: .crosshair(color: "grey")),
+                                // note that every component is considered to be a front
+                                // in this layout method
+                                component.front(with: .front),
                                 x: offset.width,
                                 y: offset.height,
                                 rotatedBy: rotation
@@ -427,51 +396,6 @@ private extension Array where Element == Layout {
             }
         }
         return sanitizedLayouts
-    }
-}
-
-private extension Array where Element == Page {
-    func interleavingBackPages(layout: ([Component]) -> [Page]) -> [Page] {
-        var interleavedPages: [Page] = []
-        for page in self {
-            let components: [Component] = page.components.compactMap {
-                if case let .component(c, _, _, _) = $0 {
-                    return c
-                } else {
-                    return nil
-                }
-            }
-
-            guard let _ = components.first(where: { $0.back != nil }) else {
-                // at least one component on this page must have a back to proceed;
-                // otherwise append a blank page and skip to next
-                interleavedPages.append(page)
-                // for duplex printing, the number of pages must be even;
-                // i.e. we must interleave a blank piece of paper for the remaining
-                // back pages to print properly
-                interleavedPages.append(Page(size: page.extent))
-                continue
-            }
-
-            var backs: [Component] = []
-            for component in components {
-                if let back = component.back {
-                    backs.append(back.withOverlays())
-                } else {
-                    backs.append(component.empty)
-                }
-            }
-
-            let duplexedPages = layout(backs)
-            guard duplexedPages.count == 1, let backPage = duplexedPages.first else {
-                // if we somehow end up with more than one page, something went wrong
-                fatalError()
-            }
-
-            interleavedPages.append(page)
-            interleavedPages.append(backPage)
-        }
-        return interleavedPages
     }
 }
 

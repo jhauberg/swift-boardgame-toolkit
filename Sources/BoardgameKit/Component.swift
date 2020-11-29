@@ -130,7 +130,7 @@ public struct Component: Dimensioned {
         return self
     }
 
-    public func back(using component: Component) -> Self {
+    public func backside(using component: Component) -> Self {
         guard component.back == nil else {
             print("warning: using frontside component as backside; back not set")
             return self
@@ -153,7 +153,7 @@ public struct Component: Dimensioned {
         return copy
     }
 
-    func withOverlays() -> Self {
+    func addingOverlays() -> Self {
         var copy = self
         let cornerRadius = 0.125.inches
         let borderWidth = 0.5.millimeters
@@ -183,7 +183,7 @@ public struct Component: Dimensioned {
         return copy
     }
 
-    func withMarks(style: GuideStyle) -> Self {
+    func addingMarks(style: GuideStyle) -> Self {
         var copy = self
 
         // set the width of the guide
@@ -209,7 +209,7 @@ public struct Component: Dimensioned {
                     .element
             )
         case let .extendedEdges(color):
-            let extent = 0.125.inches
+            let extent = trimWidth * 5
             // set an additional distance to extend beyond the extent
             // note that this only prevents overlap into neighboring components if the arranged
             // components are of similar size and setup
@@ -237,7 +237,7 @@ public struct Component: Dimensioned {
                     .element
             )
         case let .crosshair(color):
-            let extent = 0.125.inches
+            let extent = trimWidth * 5
             // set an additional distance to extend beyond the extent
             // note that this only prevents overlap into neighboring components if the arranged
             // components are of similar size and setup
@@ -315,7 +315,33 @@ public struct Component: Dimensioned {
         return copy
     }
 
-    var empty: Component {
+    func back(with guides: GuideDistribution) -> Component {
+        // an "empty" back should never show overlays to indicate that it is, indeed,
+        // an empty back; however, it _should_ be able to show cut guides
+        let backside = back?.addingOverlays() ?? removingElements
+        switch guides {
+        case .back,
+             .frontAndBack:
+            return backside.addingMarks(style: .crosshair(color: "grey"))
+        case .front,
+             .none:
+            return backside
+        }
+    }
+
+    func front(with guides: GuideDistribution) -> Component {
+        let frontside = addingOverlays()
+        switch guides {
+        case .front,
+             .frontAndBack:
+            return frontside.addingMarks(style: .crosshair(color: "grey"))
+        case .back,
+             .none:
+            return frontside
+        }
+    }
+
+    var removingElements: Component {
         Component(size: extent, bleed: bleed, trim: trim)
     }
 }
