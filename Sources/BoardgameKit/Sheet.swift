@@ -266,14 +266,14 @@ public struct Sheet {
                         page.arrange(component, x: x, y: y, rotatedBy: r)
                         let back = component.back(with: guides)
                         let turns: Layout.Turn?
-                        if component.zone.full.extent.height > component.zone.full.extent.width {
-                            // flip portrait-oriented components vertically so that
-                            // they fold on the bottom edge
-                            turns = .cw(.twice)
-                        } else {
+                        if component.zone.full.extent.width > component.zone.full.extent.height {
                             // don't flip landscape-oriented components;
                             // these fold on left/right edges and end up in same orientation
                             turns = nil
+                        } else {
+                            // flip portrait-oriented components vertically so that
+                            // they fold on the bottom edge
+                            turns = .cw(.twice)
                         }
                         page.arrange(back, x: x, y: (y + foldOffset - ref.zone.real.bottom) + gutter, rotatedBy: turns)
                     }
