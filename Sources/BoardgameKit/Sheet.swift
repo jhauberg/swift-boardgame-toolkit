@@ -275,7 +275,9 @@ public struct Sheet {
                             // they fold on the bottom edge
                             turns = .cw(.twice)
                         }
-                        page.arrange(back, x: x, y: (y + foldOffset - ref.zone.real.bottom) + gutter, rotatedBy: turns)
+                        let bottom = foldOffset + gutter - ref.zone.real.bottom + b.height
+                        let backVerticalOffset = bottom - component.portraitOrientedExtent.height - y
+                        page.arrange(back, x: x, y: backVerticalOffset, rotatedBy: turns)
                     }
 
                     pages.append(page)
