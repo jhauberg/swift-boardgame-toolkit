@@ -153,18 +153,37 @@ class BrowserDelegate: NSObject, WKNavigationDelegate {
             return
         }
         let configuration = WKSnapshotConfiguration()
-        let w = (component.portraitOrientedExtent.width.converted(to: .inches).value * dpi) / scale
-        configuration.snapshotWidth = NSNumber(value: w)
+        // note that the following dimensions should preferably be scaled by screen factor
+        // (e.g. / scale), to have the webview produce the correct snapshot, however,
+        // this is problematic due to a rounding issue (see below)
+        let w = (component.portraitOrientedExtent.width.converted(to: .inches).value * dpi)
+        let h = (component.portraitOrientedExtent.height.converted(to: .inches).value * dpi)
+
+        // note that the width given here will actually be "scaled up" depending on backing scale
+        // factor (i.e. something like @2x on a high-dpi/Retina screen)
+        // this can be problematic, because we want very specific output dimensions, and having
+        // to scale this width down may cause rounding issues; e.g. 2x75in@300dpi = 825pixels
+        // however, scaling that down before taking a snapshot = 412.5pixels
+        // this half-a-pixel will be cut, resulting in only 824pixels final output
+        // which is not acceptable in this case
+        // to counter this problem, we avoid scaling prior to snapshotting by giving it
+        // the full dimension, rounding up if needed (so we always get the larger snapshot), then
+        // downsize the snapshot manually afterward- this allows us to get the exact dimensions
+        // that we want, without having to upscale
+        configuration.snapshotWidth = NSNumber(value: ceil(w))
         webView.takeSnapshot(with: configuration) { image, error in
             guard let image = image else {
                 if let error = error {
-                    print(error)
+                    fatalError("\(error)")
                 }
                 return
             }
-
+            let targetSize = NSSize(width: w, height: h)
+            guard let newImageResized = image.resized(to: targetSize) else {
+                fatalError()
+            }
             let properties = [NSBitmapImageRep.PropertyKey.compressionFactor: 1.0]
-            guard let imageData = image.tiffRepresentation,
+            guard let imageData = newImageResized.tiffRepresentation,
                   let imageRep = NSBitmapImageRep(data: imageData),
                   let fileData = imageRep.representation(using: .png, properties: properties)
             else {
@@ -182,5 +201,38 @@ class BrowserDelegate: NSObject, WKNavigationDelegate {
                 self.renderNext()
             }
         }
+    }
+}
+
+extension NSImage {
+    func resized(to size: NSSize) -> NSImage? {
+        guard let bitmapRep = NSBitmapImageRep(
+            bitmapDataPlanes: nil,
+            pixelsWide: Int(size.width),
+            pixelsHigh: Int(size.height),
+            bitsPerSample: 8,
+            samplesPerPixel: 4,
+            hasAlpha: true,
+            isPlanar: false,
+            colorSpaceName: .calibratedRGB,
+            bytesPerRow: 0,
+            bitsPerPixel: 0
+        ) else {
+            return nil
+        }
+
+        NSGraphicsContext.saveGraphicsState()
+        NSGraphicsContext.current = NSGraphicsContext(bitmapImageRep: bitmapRep)
+        draw(
+            in: NSRect(x: 0, y: 0, width: bitmapRep.pixelsWide, height: bitmapRep.pixelsHigh),
+            from: .zero,
+            operation: .copy,
+            fraction: 1.0
+        )
+        NSGraphicsContext.restoreGraphicsState()
+
+        let resizedImage = NSImage(size: size)
+        resizedImage.addRepresentation(bitmapRep)
+        return resizedImage
     }
 }
