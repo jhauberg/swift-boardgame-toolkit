@@ -112,11 +112,9 @@ public struct Component: Dimensioned {
             bleed: bleed,
             trim: trim
         )
-        if let elm =
-            form(zone)
-        {
+        if let elm = form(zone) {
             elements.append(
-                contentsOf: elm.elements()
+                contentsOf: elm.elements
             )
         }
     }

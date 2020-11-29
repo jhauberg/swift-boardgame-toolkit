@@ -61,9 +61,13 @@ final class Page: Dimensioned {
         // inserting at start to appear below any printable content;
         // this assumes call happening _after_ a page has been fully laid out
         elements.insert(
-            contentsOf:
-            Fold(x: x, y: y, distance: distance, width: 0.5.millimeters, vertically: vertically)
-                .elements(),
+            contentsOf: Fold(
+                x: x,
+                y: y,
+                distance: distance,
+                width: 0.5.millimeters,
+                vertically: vertically
+            ).elements,
             at: elements.startIndex
         )
     }
@@ -83,7 +87,7 @@ final class Page: Dimensioned {
                 distance: distance,
                 width: 0.25.millimeters,
                 vertically: vertically
-            ).elements(),
+            ).elements,
             at: elements.startIndex
         )
     }

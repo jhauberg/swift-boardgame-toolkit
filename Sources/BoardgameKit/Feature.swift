@@ -21,7 +21,7 @@ extension Feature {
 }
 
 extension Feature {
-    func elements() -> [Element] {
+    var elements: [Element] {
         flattened
             .compactMap { $0 as? ElementConvertible }
             .map(\.element)
