@@ -179,13 +179,13 @@ class BrowserDelegate: NSObject, WKNavigationDelegate {
                 return
             }
             let targetSize = NSSize(width: w, height: h)
-            guard let newImageResized = image.resized(to: targetSize) else {
+            guard let resizedImage = image.resized(to: targetSize) else {
                 fatalError()
             }
             let properties = [NSBitmapImageRep.PropertyKey.compressionFactor: 1.0]
-            guard let imageData = newImageResized.tiffRepresentation,
-                  let imageRep = NSBitmapImageRep(data: imageData),
-                  let fileData = imageRep.representation(using: .png, properties: properties)
+            guard let imageData = resizedImage.tiffRepresentation,
+                  let bitmap = NSBitmapImageRep(data: imageData),
+                  let fileData = bitmap.representation(using: .png, properties: properties)
             else {
                 return
             }
