@@ -46,7 +46,7 @@ class BrowserDelegatePDF: NSObject, WKNavigationDelegate {
             dictionary: [
                 NSPrintInfo.AttributeKey.jobDisposition: NSPrintInfo.JobDisposition.save,
                 NSPrintInfo.AttributeKey.jobSavingURL: destinationUrl,
-                NSPrintInfo.AttributeKey.detailedErrorReporting: NSNumber(booleanLiteral: false),
+                NSPrintInfo.AttributeKey.detailedErrorReporting: NSNumber(booleanLiteral: true),
             ]
         )
 
