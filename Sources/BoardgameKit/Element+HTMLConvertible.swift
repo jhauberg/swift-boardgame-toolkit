@@ -262,7 +262,7 @@ extension Element: HTMLConvertible {
              class=\"component-content\"\
              style=\"\(contentStyle.css)\">
             \(innerContent)\
-            </div>\n
+            </div>
             \(outerContent)
             """
 
