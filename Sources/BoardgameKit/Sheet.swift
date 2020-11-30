@@ -169,32 +169,6 @@ public struct Sheet {
 
         let layouts = configuration.layouts.splitBySize
 
-#if DEBUG
-        if layouts.contains(where: { layout in
-            if case .duplex = layout.method {
-                // there's at least one layout requiring double-sided printing
-                return layouts.contains { otherLayout in
-                    // determine if mixed with any single-sided layout
-                    switch otherLayout.method {
-                    case .duplex:
-                        // same layout; don't mind this one
-                        return false
-                    case .natural,
-                         // custom is not necessarily single-sided; but in this case it should
-                         // be considered so, as it (probably) doesn't match a duplex layout
-                         .custom,
-                         .fold:
-                        // single-sided layout; final product likely won't print as expected
-                        return true
-                    }
-                }
-            }
-            return false
-        }) {
-            print("warning: double-sided layout mixed with single-sided; ignore if intentional")
-        }
-#endif
-
         for layout in layouts {
             switch layout.method {
             case let .natural(order, gap):
