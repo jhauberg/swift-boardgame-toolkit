@@ -378,13 +378,11 @@ extension Element: HTMLConvertible {
                 """
             }
 
-        case let .document(template, paper, pages, author, description):
+        case let .document(template, paper, pages):
             let pageElements: [Element] = pages.map { .page($0, margin: paper.margin) }
             let pagesHtml = pageElements.map(\.html).joined()
 
             return template
-                .replacingOccurrences(of: "{{author}}", with: author)
-                .replacingOccurrences(of: "{{description}}", with: description)
                 .replacingOccurrences(
                     of: "{{generator}}",
                     with: "swift-boardgame-toolkit \(BoardgameKit.version)"

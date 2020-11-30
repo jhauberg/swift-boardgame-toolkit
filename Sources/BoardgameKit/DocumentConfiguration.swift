@@ -1,7 +1,7 @@
 import Foundation
 
 public enum DocumentType {
-    case web(at: URL)
+    case proof(at: URL)
     case pdf(to: URL)
 }
 

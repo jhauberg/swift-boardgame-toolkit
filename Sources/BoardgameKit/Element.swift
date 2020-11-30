@@ -35,7 +35,5 @@ enum Element {
               margin: Margin)
     case document(template: String,
                   paper: Paper,
-                  pages: [Page],
-                  author: String,
-                  description: String)
+                  pages: [Page])
 }

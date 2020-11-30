@@ -80,10 +80,10 @@ public struct Sheet {
             return
         }
         switch type {
-        case let .web(url):
+        case let .proof(url):
             let pages = try arrange(using: configuration)
 
-            let siteUrl = url.appendingPathComponent("site")
+            let siteUrl = url.appendingPathComponent("proof")
             try? FileManager.default.createDirectory(
                 at: url,
                 withIntermediateDirectories: true,
@@ -91,7 +91,7 @@ public struct Sheet {
             )
             try? FileManager.default.removeItem(at: siteUrl)
             guard let templateSiteUrl = Bundle.module.resourceURL?
-                .appendingPathComponent("templates/site")
+                .appendingPathComponent("templates/proof")
             else {
                 fatalError()
             }
@@ -108,9 +108,7 @@ public struct Sheet {
             let doc = Element.document(
                 template: index,
                 paper: configuration.paper,
-                pages: pages,
-                author: description?.author ?? "",
-                description: description?.copyright ?? ""
+                pages: pages
             )
             try doc.html.write(to: indexUrl, atomically: true, encoding: .utf8)
 
@@ -135,8 +133,8 @@ public struct Sheet {
                 attributes: nil
             )
 
-            try document(type: .web(at: tempUrl), configuration: configuration)
-            let siteUrl = tempUrl.appendingPathComponent("site")
+            try document(type: .proof(at: tempUrl), configuration: configuration)
+            let siteUrl = tempUrl.appendingPathComponent("proof")
 
             let delegate = BrowserDelegatePDF(destinationUrl: url)
             delegate.paperSize = configuration.paper
