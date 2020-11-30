@@ -167,6 +167,7 @@ public struct Sheet {
 
         let layouts = configuration.layouts.splitBySize
 
+#if DEBUG
         if layouts.contains(where: { layout in
             if case .duplex = layout.method {
                 // there's at least one layout requiring double-sided printing
@@ -188,8 +189,9 @@ public struct Sheet {
             }
             return false
         }) {
-            print("warning: double-sided print layout mixed with single-sided layout")
+            print("warning: double-sided layout mixed with single-sided; ignore if intentional")
         }
+#endif
 
         for layout in layouts {
             switch layout.method {
