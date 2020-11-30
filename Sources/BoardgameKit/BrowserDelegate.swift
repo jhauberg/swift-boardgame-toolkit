@@ -1,6 +1,8 @@
 import Foundation
 import WebKit
-
+#if os(macOS)
+import Quartz.PDFKit
+#endif
 public enum BrowserDelegatePDFError: Error, Equatable {
     case notFound(at: URL)
 }
@@ -9,6 +11,7 @@ class BrowserDelegatePDF: NSObject, WKNavigationDelegate {
     private let browser: WKWebView
     private let destinationUrl: URL
     var paperSize: Paper?
+    var sheetDescription: SheetDescription?
 
     private var finishedRendering: Bool = false
     var shouldKeepRunning: Bool {
@@ -36,9 +39,39 @@ class BrowserDelegatePDF: NSObject, WKNavigationDelegate {
         succes _: Bool,
         contextInfo _: UnsafeRawPointer
     ) {
-        finishedRendering = true
         printOperation.cleanUp()
         printOperation.destroyContext()
+        attachMetadata()
+        finishedRendering = true
+    }
+
+    private func attachMetadata() {
+        #if os(macOS)
+        guard let doc = PDFDocument(url: destinationUrl),
+              var metadata = doc.documentAttributes else {
+            fatalError()
+        }
+        do {
+            try FileManager.default.removeItem(at: destinationUrl)
+        } catch {
+            print(error)
+        }
+        metadata[PDFDocumentAttribute.creatorAttribute] =
+            "swift-boardgame-toolkit \(BoardgameKit.version)"
+        if let title = sheetDescription?.title {
+            metadata[PDFDocumentAttribute.titleAttribute] = title
+        }
+        if let author = sheetDescription?.author {
+            metadata[PDFDocumentAttribute.authorAttribute] = author
+        }
+        if let copyright = sheetDescription?.copyright {
+            metadata[PDFDocumentAttribute.subjectAttribute] = copyright
+        }
+        doc.documentAttributes = metadata
+        if !doc.write(to: destinationUrl) {
+            fatalError()
+        }
+        #endif
     }
 
     func webView(_ webView: WKWebView, didFinish _: WKNavigation!) {

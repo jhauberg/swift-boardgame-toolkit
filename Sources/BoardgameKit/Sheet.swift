@@ -1,13 +1,16 @@
 import Foundation
 
 public struct SheetDescription {
+    let title: String?
     let author: String?
     let copyright: String?
 
     public init(
+        title: String? = nil,
         author: String? = nil,
         copyright: String? = nil
     ) {
+        self.title = title
         self.author = author
         self.copyright = copyright
     }
@@ -137,6 +140,7 @@ public struct Sheet {
 
             let delegate = BrowserDelegatePDF(destinationUrl: url)
             delegate.paperSize = configuration.paper
+            delegate.sheetDescription = description
             try delegate.load(siteUrl: siteUrl)
 
             let runLoop = RunLoop.current
