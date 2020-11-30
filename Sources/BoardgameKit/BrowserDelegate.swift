@@ -141,6 +141,8 @@ class BrowserDelegate: NSObject, WKNavigationDelegate {
 
         browser.navigationDelegate = self
         browser.frame = NSRect(origin: .zero, size: CGSize(width: w, height: h))
+        // experiencing strange log output?
+        // see https://stackoverflow.com/q/61338976/144433
         browser.loadHTMLString(renderHtml, baseURL: resourceURL)
     }
 
