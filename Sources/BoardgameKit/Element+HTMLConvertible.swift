@@ -270,13 +270,13 @@ extension Element: HTMLConvertible {
             style.set("top", value: y)
             style.set("left", value: x)
             // note using full extent here; i.e. including bleed
-            style.set("width", value: component.zone.full.extent.width)
-            style.set("height", value: component.zone.full.extent.height)
+            style.set("width", value: component.partition.full.extent.width)
+            style.set("height", value: component.partition.full.extent.height)
 
             let angle = rotation?.clockwiseOrientedRotation
 
             let isLandscaped: Bool =
-                component.zone.full.extent.width > component.zone.full.extent.height
+                component.partition.full.extent.width > component.partition.full.extent.height
             let portraitBounds = component.portraitOrientedExtent
             let w = portraitBounds.width.css
             let h = portraitBounds.height.css

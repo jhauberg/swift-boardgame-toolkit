@@ -25,7 +25,7 @@ public struct Layout {
 
          For manual duplexing, may God be with you.
          */
-        case duplex(gap: Distance = .zero, guides: GuideDistribution = .back)
+        case duplex(gap: Distance = .zero, guides: Component.GuideDistribution = .back)
         /**
          Arrange components such that fronts and backs go on the same page, mirrored from a
          folding line going through the middle of the page.
@@ -45,7 +45,7 @@ public struct Layout {
 
          If your printer has large margins, consider reducing the bleed or folding gutter.
          */
-        case fold(gap: Distance = .zero, gutter: Distance = 6.millimeters, guides: GuideDistribution = .back)
+        case fold(gap: Distance = .zero, gutter: Distance = 6.millimeters, guides: Component.GuideDistribution = .back)
         /**
          Arrange components in order, at pre-defined placements and orientations on a page.
 

@@ -1,13 +1,7 @@
 import Foundation
 
-public enum ImageMode {
-    case contain
-    case cover
-    case fill
-}
-
 struct ImageAttributes {
-    var mode: ImageMode?
+    var mode: Image.ScaleMode?
     var rotation: RotationAttributes?
 }
 
@@ -24,8 +18,16 @@ public struct Image: Feature {
     public init(_ path: String) {
         self.path = path
     }
+}
 
-    public func scale(_ mode: ImageMode) -> Self {
+extension Image {
+    public enum ScaleMode {
+        case contain
+        case cover
+        case fill
+    }
+
+    public func scale(_ mode: ScaleMode) -> Self {
         var copy = self
         copy.attributes.mode = mode
         return copy

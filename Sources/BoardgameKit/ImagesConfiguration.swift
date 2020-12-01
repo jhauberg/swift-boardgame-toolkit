@@ -1,61 +1,63 @@
 import Foundation
 
-public enum ImageType {
+public enum ImagesType {
     case individual(at: URL)
     case tts(to: URL)
 }
 
-public struct ImageConfiguration {
+public struct ImagesConfiguration {
     let dpi: Int
     let components: [Component]
 
     public static func custom(
         dpi: Int,
         arranging components: [Component]
-    ) -> ImageConfiguration {
-        ImageConfiguration(dpi: dpi, components: components)
+    ) -> ImagesConfiguration {
+        ImagesConfiguration(dpi: dpi, components: components)
     }
 
     public static func print(
         arranging components: [Component]
-    ) -> ImageConfiguration {
+    ) -> ImagesConfiguration {
         custom(dpi: 300, arranging: components)
     }
 
     public static func regular(
         arranging components: [Component]
-    ) -> ImageConfiguration {
+    ) -> ImagesConfiguration {
         custom(dpi: 150, arranging: components)
     }
 
     public static func web(
         arranging components: [Component]
-    ) -> ImageConfiguration {
+    ) -> ImagesConfiguration {
         custom(dpi: 96, arranging: components)
     }
+}
 
+extension ImagesConfiguration {
     public static func custom(
         dpi: Int,
         arranging components: ArraySlice<Component>
-    ) -> ImageConfiguration {
+    ) -> ImagesConfiguration {
         custom(dpi: dpi, arranging: Array(components))
     }
 
     public static func print(
         arranging components: ArraySlice<Component>
-    ) -> ImageConfiguration {
+    ) -> ImagesConfiguration {
         print(arranging: Array(components))
     }
 
     public static func regular(
         arranging components: ArraySlice<Component>
-    ) -> ImageConfiguration {
+    ) -> ImagesConfiguration {
         regular(arranging: Array(components))
     }
-
+    
     public static func web(
         arranging components: ArraySlice<Component>
-    ) -> ImageConfiguration {
+    ) -> ImagesConfiguration {
         web(arranging: Array(components))
     }
 }

@@ -1,24 +1,11 @@
 import Foundation
 
-public enum HorizontalAlignment {
-    case left
-    case middle
-    case right
-    case justify
-}
-
-public enum VerticalAlignment {
-    case top
-    case middle
-    case bottom
-}
-
 struct TextAttributes {
     var size: Units = 12.points // approximately 0.1667 inches
     var family: String = "serif"
     var color: String? = "black"
-    var horizontalAlignment: HorizontalAlignment?
-    var verticalAlignment: VerticalAlignment?
+    var horizontalAlignment: Text.HorizontalAlignment?
+    var verticalAlignment: Text.VerticalAlignment?
 
     var rotation: RotationAttributes?
 }
@@ -49,6 +36,21 @@ public struct Text: Feature {
         var copy = self
         copy.attributes.color = foregroundColor
         return copy
+    }
+}
+
+extension Text {
+    public enum HorizontalAlignment {
+        case left
+        case middle
+        case right
+        case justify
+    }
+
+    public enum VerticalAlignment {
+        case top
+        case middle
+        case bottom
     }
 
     public func align(horizontally: HorizontalAlignment) -> Self {

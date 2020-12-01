@@ -1,17 +1,17 @@
 import Foundation
 
-enum PageCoordinateSystem {
-    case relativeToPageMargins
-    case relativeToBoundingBox
-}
-
 final class Page: Dimensioned {
+    enum CoordinateSystem {
+        case relativeToPageMargins
+        case relativeToBoundingBox
+    }
+
     let extent: Size
-    let mode: PageCoordinateSystem
+    let mode: CoordinateSystem
 
     var elements: [Element] = []
 
-    init(size: Size, mode: PageCoordinateSystem = .relativeToBoundingBox) {
+    init(size: Size, mode: CoordinateSystem = .relativeToBoundingBox) {
         extent = size
         self.mode = mode
     }
@@ -85,7 +85,7 @@ final class Page: Dimensioned {
                 x: x,
                 y: y,
                 distance: distance,
-                width: 0.25.millimeters,
+                width: 1.inches / 96,
                 vertically: vertically
             ).elements,
             at: elements.startIndex

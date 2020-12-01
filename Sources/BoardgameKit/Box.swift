@@ -1,20 +1,12 @@
 import Foundation
 
-public enum BorderStyle {
-    case solid
-    case dotted
-    case dashed
-    case groove
-    case double
-}
-
 struct BoxAttributes {
     var backgroundColor: String?
     var borderWidth: Distance?
     var borderColor: String?
-    var borderStyle: BorderStyle?
+    var borderStyle: Box.BorderStyle?
     var borderRadius: Distance?
-    var borderEdges: Edge?
+    var borderEdges: Box.Border?
 
     var rotation: RotationAttributes?
 
@@ -75,21 +67,6 @@ public struct Box: Feature, Dimensioned {
         return copy
     }
 
-    // note that borders always go _inside_ the box, as all features have `box-sizing: border-box`
-    public func border(
-        _ color: String,
-        width: Distance = 1.millimeters,
-        style: BorderStyle = .solid,
-        edges: Edge = .all
-    ) -> Self {
-        var copy = self
-        copy.attributes.borderColor = color
-        copy.attributes.borderStyle = style
-        copy.attributes.borderWidth = width
-        copy.attributes.borderEdges = edges
-        return copy
-    }
-
     public func outline(
         _ color: String,
         width: Distance = 1.millimeters
@@ -105,6 +82,46 @@ public struct Box: Feature, Dimensioned {
         if !copy.htmlAttributes.classes.contains(className) {
             copy.htmlAttributes.classes.append(className)
         }
+        return copy
+    }
+}
+
+extension Box {
+    public enum BorderStyle {
+        case solid
+        case dotted
+        case dashed
+        case groove
+        case double
+    }
+
+    public struct Border: OptionSet {
+        public let rawValue: Int
+
+        public init(rawValue: Int) {
+            self.rawValue = rawValue
+        }
+
+        public static let top = Border(rawValue: 1 << 0)
+        public static let left = Border(rawValue: 1 << 1)
+        public static let right = Border(rawValue: 1 << 2)
+        public static let bottom = Border(rawValue: 1 << 3)
+
+        public static let all: Border = [.top, .right, .bottom, .left]
+    }
+    
+    // note that borders always go _inside_ the box, as all features have `box-sizing: border-box`
+    public func border(
+        _ color: String,
+        width: Distance = 1.millimeters,
+        style: BorderStyle = .solid,
+        edges: Border = .all
+    ) -> Self {
+        var copy = self
+        copy.attributes.borderColor = color
+        copy.attributes.borderStyle = style
+        copy.attributes.borderWidth = width
+        copy.attributes.borderEdges = edges
         return copy
     }
 }

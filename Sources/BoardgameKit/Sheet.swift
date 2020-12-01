@@ -34,7 +34,7 @@ public struct Sheet {
         self.bundle = bundle
     }
 
-    public func images(type: ImageType, configuration: ImageConfiguration) throws {
+    public func images(type: ImagesType, configuration: ImagesConfiguration) throws {
         guard !configuration.components.isEmpty else {
             print("warning: configuration did not provide any components; no images generated")
             return
@@ -235,7 +235,7 @@ public struct Sheet {
                     width: configuration.paper.innerBounds.width,
                     height: (
                         ((configuration.paper.innerBounds.height / 2) - gutter) +
-                            ref.zone.real.bottom
+                            ref.partition.real.bottom
                     )
                 )
 
@@ -249,12 +249,14 @@ public struct Sheet {
                 // layout components in "pages" based on a marginless paper specification
                 // exactly fitting the previously determined boundaries
                 let upperPages = fronts.arrangedLeftToRight(
-                    spacing: gap, on: Paper(boundedSize, .zero))
+                    spacing: gap,
+                    on: Paper(boundedSize, Margin.zero)
+                )
 
                 for arrangedPage in upperPages {
                     let page = Page(size: configuration.paper.extent)
                     let b = arrangedPage.boundingBox
-                    let foldOffset = b.height - ref.zone.real.bottom + gutter
+                    let foldOffset = b.height - ref.partition.real.bottom + gutter
 
                     page.fold(
                         // add a fold guide going across the entire paper, inside margins
@@ -270,7 +272,7 @@ public struct Sheet {
                         page.arrange(component, x: x, y: y, rotatedBy: r)
                         let back = component.back(with: guides)
                         let turns: Layout.Turn?
-                        if component.zone.full.extent.width > component.zone.full.extent.height {
+                        if component.partition.full.extent.width > component.partition.full.extent.height {
                             // don't flip landscape-oriented components;
                             // these fold on left/right edges and end up in same orientation
                             turns = nil
@@ -279,7 +281,7 @@ public struct Sheet {
                             // they fold on the bottom edge
                             turns = .cw(.twice)
                         }
-                        let bottom = foldOffset + gutter - ref.zone.real.bottom + b.height
+                        let bottom = foldOffset + gutter - ref.partition.real.bottom + b.height
                         let backVerticalOffset = bottom - component.portraitOrientedExtent.height - y
                         page.arrange(back, x: x, y: backVerticalOffset, rotatedBy: turns)
                     }

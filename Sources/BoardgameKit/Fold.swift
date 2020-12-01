@@ -2,7 +2,7 @@ import Foundation
 
 struct Fold: Feature {
     private var width: Distance
-    private var edges: Edge
+    private var edges: Box.Border
     private var bounds: Size
     private var offset: Size
 
