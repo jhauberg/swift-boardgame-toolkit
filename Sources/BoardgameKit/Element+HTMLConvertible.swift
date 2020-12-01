@@ -134,7 +134,7 @@ extension Element: HTMLConvertible {
                     switch horizontalAlignment {
                     case .left:
                         style.set("text-align", value: "left")
-                    case .middle:
+                    case .center:
                         style.set("text-align", value: "center")
                     case .right:
                         style.set("text-align", value: "right")

@@ -42,7 +42,7 @@ public struct Text: Feature {
 extension Text {
     public enum HorizontalAlignment {
         case left
-        case middle
+        case center
         case right
         case justify
     }
