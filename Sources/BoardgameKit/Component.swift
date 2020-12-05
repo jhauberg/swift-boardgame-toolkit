@@ -138,6 +138,10 @@ public struct Component: Dimensioned {
 
     /**
      Form an identical component to act as the backside to this frontside.
+
+     - Parameters:
+       - form: The composition of elements that form the component.
+       - area: The distinct areas that make up the component.
      */
     public func backside(@FeatureBuilder _ form: (_ area: Partition) -> Feature) -> Self {
         back = Component(
@@ -191,7 +195,7 @@ public struct Component: Dimensioned {
         // an "empty" back should never show overlays to indicate that it is, indeed,
         // an empty back; however, it _should_ be able to show cut guides
         let backside = back?.addingOverlays() ?? removingElements
-        guard let marks = marks, guides == .front else {
+        guard let marks = marks, guides != .front else {
             return backside
         }
         return backside.addingMarks(style: marks)
@@ -199,7 +203,7 @@ public struct Component: Dimensioned {
 
     func front(with guides: GuideDistribution) -> Component {
         let frontside = addingOverlays()
-        guard let marks = marks, guides == .back else {
+        guard let marks = marks, guides != .back else {
             return frontside
         }
         return frontside.addingMarks(style: marks)
