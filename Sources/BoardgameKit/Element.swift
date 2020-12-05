@@ -26,6 +26,12 @@ enum Element {
                height: Distance?,
                attributes: ImageAttributes,
                additional: HTMLAttributes)
+    case freeform(_ content: String,
+                  inset: Inset,
+                  width: Distance?,
+                  height: Distance?,
+                  attributes: FreeformAttributes,
+                  additional: HTMLAttributes)
 
     case component(_ component: Component,
                    x: Units,

@@ -227,6 +227,45 @@ extension Element: HTMLConvertible {
              style=\"\(style.css)\">\n
             """
 
+        case let .freeform(content, inset, width, height, attr, additional):
+            let classes = ["component-element"] + additional.classes
+            var style = Style()
+            if let w = width {
+                style.set("width", value: w)
+            }
+            if let h = height {
+                style.set("height", value: h)
+            }
+            if let top = inset.top {
+                style.set("top", value: top)
+            }
+            if let left = inset.left {
+                style.set("left", value: left)
+            }
+            if let right = inset.right {
+                style.set("right", value: right)
+            }
+            if let bottom = inset.bottom {
+                style.set("bottom", value: bottom)
+            }
+            if let rotation = attr.rotation {
+                style.set(
+                    "transform-origin",
+                    value: "\(rotation.anchor.x * 100)% \(rotation.anchor.y * 100)%"
+                )
+                style.set(
+                    "transform",
+                    value: "rotate(\(rotation.angle.css))"
+                )
+            }
+            return """
+            <div\
+             class=\"\(classes.joined(separator: " "))\"\
+             style=\"\(style.css)\">
+            \(content)
+            </div>\n
+            """
+
         case let .component(component, x, y, rotation):
             var contentStyle = Style()
 
