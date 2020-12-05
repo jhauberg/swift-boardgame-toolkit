@@ -4,6 +4,44 @@ struct ComponentAttributes {
     var flip: Axis?
 }
 
+/**
+ A discrete piece to a boardgame.
+
+ A `Component` is any physical piece (component) of your boardgame; it could be a card, a token
+ or a page of rules. Anything that would eventually be laid out on a page for printing.
+
+ ## Features
+
+ Components are made up of visual elements (features), and are formed at initialization.
+ Once formed, additional features can no longer be added.
+
+ ### Areas
+
+ During initialization, a scope is provided to form the component. This scope includes an implicit
+ reference to the 3 distinct areas of the component, as defined by its `bleed` and `trim`.
+ These are, 1) the full area of the component, including bleed, 2) the final, _real_ area that
+ remain after having been cut, and finally, 3) the "safe" area, which is always less than,
+ or equal to, the final area- ensuring content placed here being _inside_ the trim.
+
+ These areas can be used as guides to layout and position features.
+
+ ### Order
+
+ When forming components, the order of features matter. Here, the Painter's Algorithm applies.
+ That is, features added earlier are obscured by those added later.
+
+ For example, the following component is formed with 2 features,
+ however, only a black box would show:
+
+     Component(width: 2.5.inches, height: 3.5.inches) {
+        Text("My Card")
+            .color("white")
+        Box(covering: $0.full)
+            .background("black")
+     }
+
+ Swapping the order of the features would make white text appear on top of the black box.
+ */
 public struct Component: Dimensioned {
     private let trim: Distance
     private let bleed: Distance
@@ -33,8 +71,6 @@ public struct Component: Dimensioned {
        - bleed: The distance extending outwards from the final, cut dimensions of the component.
        - trim: The distance extending inwards from the final, cut dimensions of the component.
      - Returns: A fully-formed boardgame component, ready to be laid out on a page.
-
-     For internal use only, at the moment.
      */
     init(
         size: Size,
@@ -78,8 +114,6 @@ public struct Component: Dimensioned {
        - form: The composition of elements that form the component.
        - area: The distinct areas that make up the component.
      - Returns: A fully-formed boardgame component, ready to be arranged on a page.
-
-     Detailed description goes here.
      */
     public init(
         width: Distance,
@@ -102,6 +136,9 @@ public struct Component: Dimensioned {
         }
     }
 
+    /**
+     Form an identical component to act as the backside to this frontside.
+     */
     public func backside(@FeatureBuilder _ form: (_ area: Partition) -> Feature) -> Self {
         back = Component(
             width: extent.width,
@@ -136,7 +173,15 @@ public struct Component: Dimensioned {
         return copy
     }
 
-    public func guides(_ style: GuideStyle) -> Self {
+    /**
+     Specify the style of cut guides for this component.
+
+     The default style for any component is corner crosshairs. A `nil` style indicates that
+     this component should never have any cut guides applied to it.
+
+     Note that any associated backside does not inherit the style specified here.
+     */
+    public func guides(_ style: GuideStyle?) -> Self {
         var copy = self
         copy.marks = style
         return copy
