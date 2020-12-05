@@ -203,7 +203,7 @@ extension Element: HTMLConvertible {
                 )
                 style.set(
                     "transform",
-                    value: "rotate(\(rotation.angle.css))deg)"
+                    value: "rotate(\(rotation.angle.css))"
                 )
             }
             if let mode = attr.mode {
