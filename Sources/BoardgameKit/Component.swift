@@ -11,6 +11,8 @@ public struct Component: Dimensioned {
     private(set) var extent: Size
     private(set) var elements: [Element] = []
 
+    private(set) var marks: GuideStyle? = .crosshair(color: "grey")
+
     private(set) var attributes = ComponentAttributes()
     // using a property wrapper to allow for having a recursive type reference here
     // see https://forums.swift.org/t/using-indirect-modifier-for-struct-properties/37600/18
@@ -134,31 +136,31 @@ public struct Component: Dimensioned {
         return copy
     }
 
+    public func guides(_ style: GuideStyle) -> Self {
+        var copy = self
+        copy.marks = style
+        return copy
+    }
+
     func back(with guides: GuideDistribution) -> Component {
         // an "empty" back should never show overlays to indicate that it is, indeed,
         // an empty back; however, it _should_ be able to show cut guides
         let backside = back?.addingOverlays() ?? removingElements
-        switch guides {
-        case .back,
-             .frontAndBack:
-            return backside.addingMarks(style: .crosshair(color: "grey"))
-        case .front:
+        guard let marks = marks, guides == .front else {
             return backside
         }
+        return backside.addingMarks(style: marks)
     }
 
     func front(with guides: GuideDistribution) -> Component {
         let frontside = addingOverlays()
-        switch guides {
-        case .front,
-             .frontAndBack:
-            return frontside.addingMarks(style: .crosshair(color: "grey"))
-        case .back:
+        guard let marks = marks, guides == .back else {
             return frontside
         }
+        return frontside.addingMarks(style: marks)
     }
 
-    var removingElements: Component {
+    private var removingElements: Component {
         Component(size: extent, bleed: bleed, trim: trim)
     }
 }
@@ -187,7 +189,7 @@ extension Component {
 }
 
 extension Component {
-    func addingOverlays() -> Self {
+    private func addingOverlays() -> Self {
         var copy = self
         let cornerRadius = 0.125.inches
         let borderWidth = 0.5.millimeters
@@ -225,13 +227,13 @@ extension Component {
         case frontAndBack
     }
 
-    enum GuideStyle {
+    public enum GuideStyle {
         case boxed(color: String)
         case extendedEdges(color: String)
         case crosshair(color: String)
     }
 
-    func addingMarks(style: GuideStyle) -> Self {
+    private func addingMarks(style: GuideStyle) -> Self {
         var copy = self
 
         // set the width of the guide
