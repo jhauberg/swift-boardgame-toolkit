@@ -119,6 +119,9 @@ extension Element: HTMLConvertible {
             if let bottom = inset.bottom {
                 style.set("bottom", value: bottom)
             }
+            if let backgroundColor = attr.backgroundColor {
+                style.set("background-color", value: backgroundColor)
+            }
             if let rotation = attr.rotation {
                 style.set(
                     "transform-origin",

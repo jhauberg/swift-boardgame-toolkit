@@ -7,6 +7,8 @@ struct TextAttributes {
     var horizontalAlignment: Text.HorizontalAlignment?
     var verticalAlignment: Text.VerticalAlignment?
 
+    var backgroundColor: String?
+
     var rotation: RotationAttributes?
 }
 
@@ -35,6 +37,12 @@ public struct Text: Feature {
     public func color(_ foregroundColor: String) -> Self {
         var copy = self
         copy.attributes.color = foregroundColor
+        return copy
+    }
+
+    public func background(_ color: String) -> Self {
+        var copy = self
+        copy.attributes.backgroundColor = color
         return copy
     }
 }
