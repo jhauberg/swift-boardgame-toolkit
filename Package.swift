@@ -25,6 +25,13 @@ let package = Package(
                 .copy("templates"),
             ]
         ),
+
+        .target(
+            name: "print-standard-deck",
+            dependencies: ["BoardgameKit"],
+            path: "Examples/print-standard-deck"
+        ),
+
         .testTarget(
             name: "BoardgameKitTests",
             dependencies: ["BoardgameKit"]
