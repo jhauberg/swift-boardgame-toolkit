@@ -1,9 +1,15 @@
 import Foundation
 
 struct Inset {
+    let mutuallyExclusiveOpposites: Bool
+
+    init(allowingOppositeInsets: Bool = false) {
+        mutuallyExclusiveOpposites = !allowingOppositeInsets
+    }
+
     var top: Distance? {
         didSet {
-            if top != nil {
+            if top != nil && mutuallyExclusiveOpposites {
                 bottom = nil
             }
         }
@@ -11,7 +17,7 @@ struct Inset {
 
     var left: Distance? {
         didSet {
-            if left != nil {
+            if left != nil && mutuallyExclusiveOpposites {
                 right = nil
             }
         }
@@ -19,7 +25,7 @@ struct Inset {
 
     var right: Distance? {
         didSet {
-            if right != nil {
+            if right != nil && mutuallyExclusiveOpposites {
                 left = nil
             }
         }
@@ -27,7 +33,7 @@ struct Inset {
 
     var bottom: Distance? {
         didSet {
-            if bottom != nil {
+            if bottom != nil && mutuallyExclusiveOpposites {
                 top = nil
             }
         }

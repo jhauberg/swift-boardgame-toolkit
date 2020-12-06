@@ -6,16 +6,25 @@ public struct Area: Dimensioned {
     public static let empty = Area(extent: .zero)
 
     // inset from respective edges of any parent area
-    public private(set) var top: Distance
-    public private(set) var left: Distance
-    public private(set) var right: Distance
-    public private(set) var bottom: Distance
+    private var inset = Inset(allowingOppositeInsets: true)
+
+    public var top: Distance {
+        inset.top ?? .zero
+    }
+
+    public var left: Distance {
+        inset.left ?? .zero
+    }
+
+    public var right: Distance {
+        inset.right ?? .zero
+    }
+
+    public var bottom: Distance {
+        inset.bottom ?? .zero
+    }
 
     public init(extent: Size) {
-        top = .zero
-        left = .zero
-        right = .zero
-        bottom = .zero
         self.extent = extent
     }
 
@@ -26,21 +35,22 @@ public struct Area: Dimensioned {
         bottom: Distance? = nil,
         in area: Area
     ) {
-        // default each edge if needed
-        self.top = top ?? .zero
-        self.left = left ?? .zero
-        self.right = right ?? .zero
-        self.bottom = bottom ?? .zero
+        let t = top ?? .zero
+        let l = left ?? .zero
+        let r = right ?? .zero
+        let b = bottom ?? .zero
         // determine extents before applying parent insets
         extent = Size(
-            width: area.extent.width - (self.left + self.right),
-            height: area.extent.height - (self.top + self.bottom)
+            width: area.extent.width - (l + r),
+            height: area.extent.height - (t + b)
         )
-        // apply parent insets
-        self.top = self.top + area.top
-        self.left = self.left + area.left
-        self.right = self.right + area.right
-        self.bottom = self.bottom + area.bottom
+        precondition(extent.width.value >= 0)
+        precondition(extent.height.value >= 0)
+        // apply insets + parent insets
+        self.inset.top = t + area.top
+        self.inset.left = l + area.left
+        self.inset.right = r + area.right
+        self.inset.bottom = b + area.bottom
     }
 
     public init(
