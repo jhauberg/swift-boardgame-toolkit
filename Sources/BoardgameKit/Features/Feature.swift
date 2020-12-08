@@ -36,14 +36,3 @@ struct Group: Feature, Composite {
     let children: [Feature]
     let form: Feature? = nil
 }
-
-public struct For: Feature, Composite {
-    let children: [Feature]
-    public init<S: Sequence>(sequence: S,
-                             @FeatureBuilder _ builder: (_ item: S.Element) -> Feature)
-    {
-        children = sequence.map(builder)
-    }
-
-    public let form: Feature? = nil
-}
