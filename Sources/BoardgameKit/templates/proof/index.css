@@ -70,7 +70,7 @@ html, body {
 
 @media print {
   @page {
-      size: {{page_width}} {{page_height}};
+      size: {{pw}} {{ph}};
       margin: 0 !important;
   }
 

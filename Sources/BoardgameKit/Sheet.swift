@@ -41,12 +41,13 @@ public struct Sheet {
         }
         switch type {
         case let .individual(url):
-            let imageRenderer = try ImageRenderer(
+            let images = try ImageRenderer(
                 configuration: configuration,
                 destinationUrl: url,
-                resourceUrl: bundle?.resourceURL)
+                resourceUrl: bundle?.resourceURL
+            )
 
-            imageRenderer.render()
+            images.render()
 
         case .tts:
             fatalError("not implemented yet")
@@ -62,71 +63,38 @@ public struct Sheet {
         case let .proof(url):
             let pages = try arrange(using: configuration)
 
-            let siteUrl = url.appendingPathComponent("proof")
-            try? FileManager.default.createDirectory(
-                at: url,
-                withIntermediateDirectories: true,
-                attributes: nil
+            let doc = try ProofRenderer(
+                configuration: configuration,
+                pages: pages,
+                destinationUrl: url,
+                resourceUrl: bundle?.resourceURL
             )
-            try? FileManager.default.removeItem(at: siteUrl)
-            guard let templateSiteUrl = Bundle.module.resourceURL?
-                .appendingPathComponent("templates/proof")
-            else {
-                fatalError()
-            }
-            try FileManager.default.copyItem(at: templateSiteUrl, to: siteUrl)
-            if let assetsUrl = bundle?.resourceURL?.appendingPathComponent("assets") {
-                try FileManager.default.copyItem(
-                    at: assetsUrl, to: siteUrl.appendingPathComponent("assets")
-                )
-            }
-
-            let indexUrl = siteUrl.appendingPathComponent("index.html")
-            let index = try String(contentsOf: indexUrl, encoding: .utf8)
-
-            let doc = Element.document(
-                template: index,
-                paper: configuration.paper,
-                pages: pages
-            )
-            try doc.html.write(to: indexUrl, atomically: true, encoding: .utf8)
-
-            let cssUrl = siteUrl.appendingPathComponent("index.css")
-            let css = try String(contentsOf: cssUrl, encoding: .utf8)
-                .replacingOccurrences(
-                    of: "{{page_width}}", with: configuration.paper.extent.width.css
-                )
-                .replacingOccurrences(
-                    of: "{{page_height}}", with: configuration.paper.extent.height.css
-                )
-            try css.write(to: cssUrl, atomically: true, encoding: .utf8)
-
-            print("saved site at \(siteUrl)")
+            
+            try doc.render()
 
         case let .pdf(url):
-            let tempUrl = URL(fileURLWithPath: NSTemporaryDirectory())
+            let tempLocationUrl = URL(fileURLWithPath: NSTemporaryDirectory())
                 .appendingPathComponent("swift-boardgame-toolkit")
             try FileManager.default.createDirectory(
-                at: tempUrl,
+                at: tempLocationUrl,
                 withIntermediateDirectories: true,
                 attributes: nil
             )
+            try document(type: .proof(at: tempLocationUrl), configuration: configuration)
+            let proofUrl = tempLocationUrl.appendingPathComponent("proof")
+            guard FileManager.default.fileExists(atPath: proofUrl.path) else {
+                fatalError()
+            }
+            let doc = PDFRenderer(
+                locationUrl: proofUrl,
+                destinationUrl: url,
+                paper: configuration.paper,
+                meta: description
+            )
 
-            try document(type: .proof(at: tempUrl), configuration: configuration)
-            let siteUrl = tempUrl.appendingPathComponent("proof")
+            try doc.render()
 
-            let delegate = BrowserDelegatePDF(destinationUrl: url)
-            delegate.paperSize = configuration.paper
-            delegate.sheetDescription = description
-            try delegate.load(siteUrl: siteUrl)
-
-            let runLoop = RunLoop.current
-
-            while delegate.shouldKeepRunning,
-                  runLoop.run(mode: .default,
-                              before: .distantFuture) {}
-
-            try FileManager.default.removeItem(at: tempUrl) // clean up
+            try FileManager.default.removeItem(at: tempLocationUrl)
         }
     }
 
