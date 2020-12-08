@@ -41,33 +41,12 @@ public struct Sheet {
         }
         switch type {
         case let .individual(url):
-            try FileManager.default.createDirectory(
-                at: url,
-                withIntermediateDirectories: true,
-                attributes: nil
-            )
+            let imageRenderer = try ImageRenderer(
+                configuration: configuration,
+                destinationUrl: url,
+                resourceUrl: bundle?.resourceURL)
 
-            guard let renderTemplateUrl = Bundle.module.resourceURL?
-                .appendingPathComponent("templates/render/index.html"),
-                let renderTemplate = try? String(contentsOf: renderTemplateUrl, encoding: .utf8)
-            else {
-                return
-            }
-
-            let delegate = BrowserDelegate(
-                template: renderTemplate,
-                url: url,
-                resourceURL: bundle?.resourceURL,
-                components: configuration.components
-            )
-            delegate.dpi = Double(configuration.dpi)
-            delegate.renderNext()
-
-            let runLoop = RunLoop.current
-
-            while delegate.shouldKeepRunning,
-                  runLoop.run(mode: .default,
-                              before: .distantFuture) {}
+            imageRenderer.render()
 
         case .tts:
             fatalError("not implemented yet")

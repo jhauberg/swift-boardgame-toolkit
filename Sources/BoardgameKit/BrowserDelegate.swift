@@ -129,70 +129,128 @@ class BrowserDelegatePDF: NSObject, WKNavigationDelegate {
     }
 }
 
-class BrowserDelegate: NSObject, WKNavigationDelegate {
-    private let browser: WKWebView
-    private let template: String
-    private let resourceURL: URL?
-    private let scale: Double
-    private var queue: [Component] = []
+class Renderer: NSObject {
+    private var hasFinishedRendering: Bool = false
 
-    var dpi: Double = 300
+    var webView: WKWebView
 
-    let destinationUrl: URL
-
-    init(template: String, url: URL, resourceURL: URL?, components: [Component]) {
-        self.template = template
-        self.resourceURL = resourceURL
-        destinationUrl = url
-        queue.append(contentsOf: components)
-        // we have to determine screen scale; i.e. high dpi/retina screen might be 2 or 3
-        // we have to know this because we want to render output in scale=1
-        if let screen = NSScreen.main {
-            scale = Double(screen.backingScaleFactor)
-        } else {
-            scale = 1
-        }
-
+    override init() {
         let config = WKWebViewConfiguration()
         config.suppressesIncrementalRendering = true
-
-        browser = WKWebView(frame: .zero, configuration: config)
+        webView = WKWebView(frame: .zero, configuration: config)
     }
 
-    func renderNext() {
-        guard let component = queue.last else {
-            return
+    fileprivate func beginRendering() {
+        hasFinishedRendering = false
+        while RunLoop.current.run(mode: .default, before: .distantFuture) {
+            if hasFinishedRendering {
+                break
+            }
+        }
+    }
+
+    func render() {
+        fatalError("must be called on subclass")
+    }
+
+    fileprivate func finishRendering() {
+        hasFinishedRendering = true
+    }
+}
+
+final class ImageRenderer: Renderer {
+    private struct Rendition {
+        let index: Int
+        let component: Component
+        let format: String
+    }
+
+    private let dpi: Double
+    private let format: String
+    private let template: String
+    private let resourceUrl: URL?
+    private let destinationUrl: URL
+
+    private var queue: [Component]
+    private var current: Rendition?
+
+    init(configuration: ImagesConfiguration, destinationUrl: URL, resourceUrl: URL?) throws {
+        guard let templateUrl = Bundle.module.resourceURL?
+                .appendingPathComponent("templates/render/index.html") else {
+            fatalError()
         }
 
-        let element: Element = .component(component, x: .zero, y: .zero)
-        let renderHtml = template.replacingOccurrences(of: "{{component}}", with: element.html)
+        template = try String(contentsOf: templateUrl, encoding: .utf8)
 
+        try FileManager.default.createDirectory(
+            at: destinationUrl,
+            withIntermediateDirectories: true,
+            attributes: nil
+        )
+
+        self.dpi = Double(configuration.dpi)
+        self.format = configuration.format
+        self.resourceUrl = resourceUrl
+        self.destinationUrl = destinationUrl
+        self.queue = configuration.components.reversed()
+
+        super.init()
+    }
+
+    private func render(rendition: Rendition) {
+        let component = rendition.component
+        let dimensions = component.portraitOrientedExtent
         // this is required to get correct sizing; see snapshot to apply desired dpi
         let nativeDPI: Double = 96
-        let w = component.portraitOrientedExtent.width.converted(to: .inches).value * nativeDPI
-        let h = component.portraitOrientedExtent.height.converted(to: .inches).value * nativeDPI
+        let w = dimensions.width.converted(to: .inches).value * nativeDPI
+        let h = dimensions.height.converted(to: .inches).value * nativeDPI
 
-        browser.navigationDelegate = self
-        browser.frame = NSRect(origin: .zero, size: CGSize(width: w, height: h))
+        let element: Element = .component(component, x: .zero, y: .zero)
+        let content = template.replacingOccurrences(of: "{{component}}", with: element.html)
+
+        current = rendition
+
+        webView.navigationDelegate = self
+        webView.frame = NSRect(origin: .zero, size: CGSize(width: w, height: h))
         // experiencing strange log output?
         // see https://stackoverflow.com/q/61338976/144433
-        browser.loadHTMLString(renderHtml, baseURL: resourceURL)
+        webView.loadHTMLString(content, baseURL: resourceUrl)
+
+        beginRendering()
     }
 
-    var shouldKeepRunning: Bool {
-        !queue.isEmpty
-    }
-
-    func webView(_ webView: WKWebView, didFinish _: WKNavigation!) {
-        guard let component = queue.last else {
+    override func render() {
+        guard !queue.isEmpty else {
             return
         }
+
+        guard let component = queue.popLast() else {
+            return
+        }
+
+        let indexOffset = current?.index ?? 0
+
+        render(
+            rendition: Rendition(
+                index: 1 + indexOffset, // start from 1; not zero- just a preference for files
+                component: component,
+                format: format))
+    }
+}
+
+extension ImageRenderer: WKNavigationDelegate {
+    func webView(_ webView: WKWebView, didFinish _: WKNavigation!) {
+        guard let rendition = current else {
+            fatalError()
+        }
+
         let configuration = WKSnapshotConfiguration()
+        let dimensions = rendition.component.portraitOrientedExtent
         // note that the following dimensions should preferably be scaled by screen factor
         // (e.g. / scale), to have the webview produce the correct snapshot, however,
         // this is problematic due to a rounding issue (see below)
-        let w = (component.portraitOrientedExtent.width.converted(to: .inches).value * dpi)
-        let h = (component.portraitOrientedExtent.height.converted(to: .inches).value * dpi)
+        let w = (dimensions.width.converted(to: .inches).value * dpi)
+        let h = (dimensions.height.converted(to: .inches).value * dpi)
 
         // note that the width given here will actually be "scaled up" depending on backing scale
         // factor (i.e. something like @2x on a high-dpi/Retina screen)
@@ -213,10 +271,12 @@ class BrowserDelegate: NSObject, WKNavigationDelegate {
                 }
                 return
             }
+
             let targetSize = NSSize(width: w, height: h)
             guard let resizedImage = image.resized(to: targetSize) else {
                 fatalError()
             }
+
             let properties = [NSBitmapImageRep.PropertyKey.compressionFactor: 1.0]
             guard let imageData = resizedImage.tiffRepresentation,
                   let bitmap = NSBitmapImageRep(data: imageData),
@@ -225,15 +285,25 @@ class BrowserDelegate: NSObject, WKNavigationDelegate {
                 return
             }
 
-            let fileUrl = self.destinationUrl
-                .appendingPathComponent("output_\(self.queue.count).png")
-            try! fileData.write(to: fileUrl, options: .atomic)
+            let fileUrl = self.destinationUrl.appendingPathComponent(
+                String(format: rendition.format, rendition.index).appending(".png"))
 
-            // finally pop it once we have processed it
-            _ = self.queue.popLast()
-            // and continue on to the next, if any
-            if !self.queue.isEmpty {
-                self.renderNext()
+            do {
+                try fileData.write(to: fileUrl, options: .atomic)
+            } catch {
+                fatalError()
+            }
+
+            self.finishRendering()
+
+            if let back = rendition.component.back {
+                self.render(
+                    rendition: Rendition(
+                        index: rendition.index, // note using same index; i.e. not incrementing
+                        component: back,
+                        format: rendition.format + "_back"))
+            } else {
+                self.render()
             }
         }
     }

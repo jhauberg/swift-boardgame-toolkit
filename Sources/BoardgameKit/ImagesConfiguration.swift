@@ -8,12 +8,14 @@ public enum ImagesType {
 public struct ImagesConfiguration {
     let dpi: Int
     let components: [Component]
+    let format: String
 
     public static func custom(
         dpi: Int,
-        arranging components: [Component]
+        arranging components: [Component],
+        format: String = "%03d"
     ) -> ImagesConfiguration {
-        ImagesConfiguration(dpi: dpi, components: components)
+        ImagesConfiguration(dpi: dpi, components: components, format: format)
     }
 
     public static func print(
