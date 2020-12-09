@@ -1,7 +1,7 @@
 import Foundation
 
 public enum ImagesType {
-    case individual(at: URL? = nil)
+    case png(at: URL? = nil)
     case tts(to: URL)
 }
 

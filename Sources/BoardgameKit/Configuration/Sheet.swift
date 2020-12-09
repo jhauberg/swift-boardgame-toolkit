@@ -18,7 +18,6 @@ public struct SheetDescription {
 
 public enum SheetError: Error {
     case outOfBounds(size: Size)
-    case notLaidOut(amount: Int)
 }
 
 public struct Sheet {
@@ -40,7 +39,7 @@ public struct Sheet {
             return
         }
         switch type {
-        case let .individual(url):
+        case let .png(url):
             let images = try ImageRenderer(
                 configuration: configuration,
                 destinationUrl: url,
