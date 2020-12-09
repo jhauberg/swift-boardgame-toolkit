@@ -98,7 +98,7 @@ let url = URL(fileURLWithPath: "standard-deck.A4.pdf")
 // arranging cards in a natural, left-to-right order
 // this should fit 3x3 cards on every page
 try sheet.document(
-    type: .pdf(to: url),
+    target: .pdf(to: url),
     configuration: .portrait(on: .a4, arranging: [
         // note that we don't need to explicitly specify to skip backs in this case,
         // as we have not actually composed any backsides

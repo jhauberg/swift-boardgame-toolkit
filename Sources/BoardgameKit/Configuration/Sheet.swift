@@ -33,12 +33,12 @@ public struct Sheet {
         self.bundle = bundle
     }
 
-    public func images(type: ImagesType, configuration: ImagesConfiguration) throws {
+    public func images(target: ImagesTarget, configuration: ImagesConfiguration) throws {
         guard !configuration.components.isEmpty else {
             print("warning: configuration did not provide any components; no images generated")
             return
         }
-        switch type {
+        switch target {
         case let .png(url):
             let images = try ImageRenderer(
                 configuration: configuration,
@@ -53,12 +53,12 @@ public struct Sheet {
         }
     }
 
-    public func document(type: DocumentType, configuration: DocumentConfiguration) throws {
+    public func document(target: DocumentTarget, configuration: DocumentConfiguration) throws {
         guard !configuration.layouts.isEmpty else {
             print("warning: configuration did not provide any layouts; document not generated")
             return
         }
-        switch type {
+        switch target {
         case let .proof(url):
             let pages = try arrange(using: configuration)
 
@@ -79,7 +79,7 @@ public struct Sheet {
                 withIntermediateDirectories: true,
                 attributes: nil
             )
-            try document(type: .proof(at: tempLocationUrl), configuration: configuration)
+            try document(target: .proof(at: tempLocationUrl), configuration: configuration)
             let proofUrl = tempLocationUrl.appendingPathComponent("proof")
             guard FileManager.default.fileExists(atPath: proofUrl.path) else {
                 fatalError()

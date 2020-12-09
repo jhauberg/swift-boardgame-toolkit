@@ -1,6 +1,6 @@
 import Foundation
 
-public enum ImagesType {
+public enum ImagesTarget {
     case png(at: URL? = nil)
     case tts(to: URL)
 }
