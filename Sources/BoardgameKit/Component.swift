@@ -49,7 +49,7 @@ public struct Component: Dimensioned {
     private(set) var extent: Size
     private(set) var elements: [Element] = []
 
-    private(set) var marks: GuideStyle? = .crosshair(color: "grey")
+    private var marks: GuideStyle? = .crosshair(color: "grey")
 
     private(set) var attributes = ComponentAttributes()
     // using a property wrapper to allow for having a recursive type reference here
@@ -60,7 +60,7 @@ public struct Component: Dimensioned {
     // was laid out on a page; which, in this case, happened twice)
     @Indirect private(set) var back: Component?
 
-    let partition: Partition
+    let parts: Partition
     let portraitOrientedExtent: Size
 
     /**
@@ -96,7 +96,7 @@ public struct Component: Dimensioned {
         let trimZone = Area(inset: self.bleed, in: bledZone)
         let safeZone = Area(inset: self.trim, in: trimZone)
 
-        partition = Partition(
+        parts = Partition(
             full: bledZone,
             real: trimZone,
             safe: safeZone
@@ -112,7 +112,7 @@ public struct Component: Dimensioned {
        - bleed: The distance extending outwards from the final, cut dimensions of the component.
        - trim: The distance extending inwards from the final, cut dimensions of the component.
        - form: The composition of elements that form the component.
-       - area: The distinct areas that make up the component.
+       - parts: The distinct areas that make up the component.
      - Returns: A fully-formed boardgame component, ready to be arranged on a page.
      */
     public init(
@@ -120,7 +120,7 @@ public struct Component: Dimensioned {
         height: Distance,
         bleed: Distance = 0.125.inches,
         trim: Distance = 0.125.inches,
-        @FeatureBuilder _ form: (_ area: Partition) -> Feature? = { _ in
+        @FeatureBuilder _ form: (_ parts: Partition) -> Feature? = { _ in
             nil
         }
     ) {
@@ -129,7 +129,7 @@ public struct Component: Dimensioned {
             bleed: bleed,
             trim: trim
         )
-        if let elm = form(partition) {
+        if let elm = form(parts) {
             elements.append(
                 contentsOf: elm.elements
             )
@@ -143,7 +143,7 @@ public struct Component: Dimensioned {
        - form: The composition of elements that form the component.
        - area: The distinct areas that make up the component.
      */
-    public func backside(@FeatureBuilder _ form: (_ area: Partition) -> Feature) -> Self {
+    public func backside(@FeatureBuilder _ form: (_ parts: Partition) -> Feature) -> Self {
         back = Component(
             width: extent.width,
             height: extent.height,
@@ -243,7 +243,7 @@ extension Component {
         let cornerRadius = 0.125.inches
         let borderWidth = 0.5.millimeters
         copy.elements.append(
-            Box(covering: partition.real)
+            Box(covering: parts.real)
                 .border("crimson", width: borderWidth)
                 // note use of outer-border here; if we instead covered the bleed using a
                 // box with a wide border (inwards), then we could not cover the corner gap;
@@ -258,7 +258,7 @@ extension Component {
         )
         if trim > .zero {
             copy.elements.append(
-                Box(covering: partition.safe)
+                Box(covering: parts.safe)
                     .border("royalblue", width: borderWidth, style: .dashed)
                     .corners(radius: cornerRadius)
                     .classed("do-not-print")
@@ -303,7 +303,7 @@ extension Component {
         switch style {
         case let .boxed(color):
             copy.elements.append(
-                Box(covering: Area(inset: inset, in: partition.real))
+                Box(covering: Area(inset: inset, in: parts.real))
                     .border(color, width: trimWidth, style: border, edges: .all)
                     .classed("guide")
                     .element
@@ -320,7 +320,7 @@ extension Component {
                              left: inset - extent - reach,
                              right: inset - extent - reach,
                              bottom: inset,
-                             in: partition.real))
+                             in: parts.real))
                     .border(color, width: trimWidth, style: border, edges: [.top, .bottom])
                     .classed("guide")
                     .element
@@ -331,7 +331,7 @@ extension Component {
                              left: inset,
                              right: inset,
                              bottom: inset - extent - reach,
-                             in: partition.real))
+                             in: parts.real))
                     .border(color, width: trimWidth, style: border, edges: [.left, .right])
                     .classed("guide")
                     .element
@@ -345,16 +345,16 @@ extension Component {
             // top-left
             copy.elements.append(
                 Box(width: (extent * 2) + reach, height: extent)
-                    .left(partition.real.left + inset - extent - reach)
-                    .top(partition.real.top + inset)
+                    .left(parts.real.left + inset - extent - reach)
+                    .top(parts.real.top + inset)
                     .border(color, width: trimWidth, style: border, edges: [.top])
                     .classed("guide")
                     .element
             )
             copy.elements.append(
                 Box(width: extent, height: (extent * 2) + reach)
-                    .left(partition.real.left + inset)
-                    .top(partition.real.top + inset - extent - reach)
+                    .left(parts.real.left + inset)
+                    .top(parts.real.top + inset - extent - reach)
                     .border(color, width: trimWidth, style: border, edges: .left)
                     .classed("guide")
                     .element
@@ -362,16 +362,16 @@ extension Component {
             // top-right
             copy.elements.append(
                 Box(width: (extent * 2) + reach, height: extent)
-                    .right(partition.real.right + inset - extent - reach)
-                    .top(partition.real.top + inset)
+                    .right(parts.real.right + inset - extent - reach)
+                    .top(parts.real.top + inset)
                     .border(color, width: trimWidth, style: border, edges: [.top])
                     .classed("guide")
                     .element
             )
             copy.elements.append(
                 Box(width: extent, height: (extent * 2) + reach)
-                    .right(partition.real.right + inset)
-                    .top(partition.real.top + inset - extent - reach)
+                    .right(parts.real.right + inset)
+                    .top(parts.real.top + inset - extent - reach)
                     .border(color, width: trimWidth, style: border, edges: .right)
                     .classed("guide")
                     .element
@@ -379,16 +379,16 @@ extension Component {
             // bottom-left
             copy.elements.append(
                 Box(width: (extent * 2) + reach, height: extent)
-                    .left(partition.real.left + inset - extent - reach)
-                    .bottom(partition.real.bottom + inset)
+                    .left(parts.real.left + inset - extent - reach)
+                    .bottom(parts.real.bottom + inset)
                     .border(color, width: trimWidth, style: border, edges: [.bottom])
                     .classed("guide")
                     .element
             )
             copy.elements.append(
                 Box(width: extent, height: (extent * 2) + reach)
-                    .left(partition.real.left + inset)
-                    .bottom(partition.real.bottom + inset - extent - reach)
+                    .left(parts.real.left + inset)
+                    .bottom(parts.real.bottom + inset - extent - reach)
                     .border(color, width: trimWidth, style: border, edges: .left)
                     .classed("guide")
                     .element
@@ -396,16 +396,16 @@ extension Component {
             // bottom-right
             copy.elements.append(
                 Box(width: (extent * 2) + reach, height: extent)
-                    .right(partition.real.right + inset - extent - reach)
-                    .bottom(partition.real.bottom + inset)
+                    .right(parts.real.right + inset - extent - reach)
+                    .bottom(parts.real.bottom + inset)
                     .border(color, width: trimWidth, style: border, edges: [.bottom])
                     .classed("guide")
                     .element
             )
             copy.elements.append(
                 Box(width: extent, height: (extent * 2) + reach)
-                    .right(partition.real.right + inset)
-                    .bottom(partition.real.bottom + inset - extent - reach)
+                    .right(parts.real.right + inset)
+                    .bottom(parts.real.bottom + inset - extent - reach)
                     .border(color, width: trimWidth, style: border, edges: .right)
                     .classed("guide")
                     .element

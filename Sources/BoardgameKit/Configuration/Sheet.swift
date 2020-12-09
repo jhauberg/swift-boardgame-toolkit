@@ -181,7 +181,7 @@ public struct Sheet {
                     width: configuration.paper.innerBounds.width,
                     height: (
                         ((configuration.paper.innerBounds.height / 2) - gutter) +
-                            ref.partition.real.bottom
+                            ref.parts.real.bottom
                     )
                 )
 
@@ -202,7 +202,7 @@ public struct Sheet {
                 for arrangedPage in upperPages {
                     let page = Page(size: configuration.paper.extent)
                     let b = arrangedPage.boundingBox
-                    let foldOffset = b.height - ref.partition.real.bottom + gutter
+                    let foldOffset = b.height - ref.parts.real.bottom + gutter
 
                     page.fold(
                         // add a fold guide going across the entire paper, inside margins
@@ -218,7 +218,7 @@ public struct Sheet {
                         page.arrange(component, x: x, y: y, rotatedBy: r)
                         let back = component.back(with: guides)
                         let turns: Layout.Turn?
-                        if component.partition.full.extent.width > component.partition.full.extent.height {
+                        if component.parts.full.extent.width > component.parts.full.extent.height {
                             // don't flip landscape-oriented components;
                             // these fold on left/right edges and end up in same orientation
                             turns = nil
@@ -227,7 +227,7 @@ public struct Sheet {
                             // they fold on the bottom edge
                             turns = .cw(.twice)
                         }
-                        let bottom = foldOffset + gutter - ref.partition.real.bottom + b.height
+                        let bottom = foldOffset + gutter - ref.parts.real.bottom + b.height
                         let backVerticalOffset = bottom - component.portraitOrientedExtent.height - y
                         page.arrange(back, x: x, y: backVerticalOffset, rotatedBy: turns)
                     }
