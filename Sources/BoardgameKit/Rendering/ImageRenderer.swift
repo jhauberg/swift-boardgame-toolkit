@@ -12,12 +12,12 @@ final class ImageRenderer: Renderer {
     private let format: String
     private let template: String
     private let resourceUrl: URL?
-    private let destinationUrl: URL
+    private let directoryUrl: URL
 
     private var queue: [Component]
     private var current: Rendition?
 
-    init(configuration: ImagesConfiguration, destinationUrl: URL, resourceUrl: URL?) throws {
+    init(configuration: ImagesConfiguration, destinationUrl: URL?, resourceUrl: URL?) throws {
         guard let templateUrl = Bundle.module.resourceURL?
                 .appendingPathComponent("templates/render/index.html") else {
             fatalError()
@@ -25,17 +25,19 @@ final class ImageRenderer: Renderer {
 
         template = try String(contentsOf: templateUrl, encoding: .utf8)
 
+        self.dpi = Double(configuration.dpi)
+        self.format = configuration.format
+        self.queue = configuration.components.reversed()
+        self.resourceUrl = resourceUrl
+        self.directoryUrl = destinationUrl ?? URL(
+            fileURLWithPath: FileManager.default.currentDirectoryPath
+        ).appendingPathComponent("images")
+
         try FileManager.default.createDirectory(
-            at: destinationUrl,
+            at: directoryUrl,
             withIntermediateDirectories: true,
             attributes: nil
         )
-
-        self.dpi = Double(configuration.dpi)
-        self.format = configuration.format
-        self.resourceUrl = resourceUrl
-        self.destinationUrl = destinationUrl
-        self.queue = configuration.components.reversed()
 
         super.init()
     }
@@ -128,7 +130,7 @@ extension ImageRenderer: WKNavigationDelegate {
                 return
             }
 
-            let fileUrl = self.destinationUrl.appendingPathComponent(
+            let fileUrl = self.directoryUrl.appendingPathComponent(
                 String(format: rendition.format, rendition.index).appending(".png"))
 
             do {

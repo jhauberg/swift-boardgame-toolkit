@@ -1,22 +1,24 @@
 import Foundation
 
 final class ProofRenderer: Renderer {
-    private let destinationUrl: URL
+    private let directoryUrl: URL
     private let resourceUrl: URL?
     private let paper: Paper
     private let pages: [Page]
 
-    init(configuration: DocumentConfiguration, pages: [Page], destinationUrl: URL, resourceUrl: URL?) throws {
-        self.destinationUrl = destinationUrl
-        self.resourceUrl = resourceUrl
+    init(configuration: DocumentConfiguration, pages: [Page], destinationUrl: URL?, resourceUrl: URL?) throws {
         self.pages = pages
         self.paper = configuration.paper
+        self.resourceUrl = resourceUrl
+        self.directoryUrl = destinationUrl ?? URL(
+            fileURLWithPath: FileManager.default.currentDirectoryPath
+        )
     }
 
     override func render() throws {
-        let siteUrl = destinationUrl.appendingPathComponent("proof")
+        let siteUrl = directoryUrl.appendingPathComponent("proof")
         try FileManager.default.createDirectory(
-            at: destinationUrl,
+            at: directoryUrl,
             withIntermediateDirectories: true,
             attributes: nil
         )
