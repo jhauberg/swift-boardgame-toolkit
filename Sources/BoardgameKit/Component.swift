@@ -61,6 +61,14 @@ public struct Component: Dimensioned {
     @Indirect private(set) var back: Component?
 
     let parts: Partition
+    /**
+     The physical dimensions of this component when oriented such that its longest edge goes
+     vertically.
+
+     For example, a component that is wider than it is tall, would have its dimensions flipped
+     when using this property. For a component that is taller than it is wide, this property
+     would be equal to `extent`.
+     */
     let portraitOrientedExtent: Size
 
     /**
@@ -92,19 +100,19 @@ public struct Component: Dimensioned {
         portraitOrientedExtent = Size(width: min(bounds.width, bounds.height),
                                       height: max(bounds.width, bounds.height))
 
-        let bledZone = Area(extent: bounds)
-        let trimZone = Area(inset: self.bleed, in: bledZone)
+        let bleedZone = Area(extent: bounds)
+        let trimZone = Area(inset: self.bleed, in: bleedZone)
         let safeZone = Area(inset: self.trim, in: trimZone)
 
         parts = Partition(
-            full: bledZone,
+            full: bleedZone,
             real: trimZone,
             safe: safeZone
         )
     }
 
     /**
-     Initializes a new boardgame component.
+     Initializes a new and discrete boardgame component.
 
      - Parameters:
        - width: The physical width of the component.
@@ -113,7 +121,7 @@ public struct Component: Dimensioned {
        - trim: The distance extending inwards from the final, cut dimensions of the component.
        - form: The composition of elements that form the component.
        - parts: The distinct areas that make up the component.
-     - Returns: A fully-formed boardgame component, ready to be arranged on a page.
+     - Returns: A discrete component, ready to be arranged on a page.
      */
     public init(
         width: Distance,
@@ -137,7 +145,7 @@ public struct Component: Dimensioned {
     }
 
     /**
-     Form an identical component to act as the backside to this frontside.
+     Form a component to represent the backside to this frontside.
 
      - Parameters:
        - form: The composition of elements that form the component.
@@ -154,6 +162,9 @@ public struct Component: Dimensioned {
         return self
     }
 
+    /**
+     Set the component that represents the backside to this frontside.
+     */
     public func backside(using component: Component) -> Self {
         guard component.back == nil else {
             print("warning: using frontside component as backside; back not set")
@@ -191,6 +202,9 @@ public struct Component: Dimensioned {
         return copy
     }
 
+    /**
+     Returns the backside of this component for proofing.
+     */
     func back(with guides: GuideDistribution) -> Component {
         // an "empty" back should never show overlays to indicate that it is, indeed,
         // an empty back; however, it _should_ be able to show cut guides
@@ -201,6 +215,9 @@ public struct Component: Dimensioned {
         return backside.addingMarks(style: marks)
     }
 
+    /**
+     Returns the frontside of this component for proofing.
+     */
     func front(with guides: GuideDistribution) -> Component {
         let frontside = addingOverlays()
         guard let marks = marks, guides != .back else {
@@ -209,6 +226,9 @@ public struct Component: Dimensioned {
         return frontside.addingMarks(style: marks)
     }
 
+    /**
+     Returns an empty component, identical to this component in both dimensions and partitioning.
+     */
     private var removingElements: Component {
         Component(size: extent, bleed: bleed, trim: trim)
     }

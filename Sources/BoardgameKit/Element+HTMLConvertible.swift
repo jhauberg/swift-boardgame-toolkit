@@ -319,6 +319,9 @@ extension Element: HTMLConvertible {
 
             let isLandscaped: Bool =
                 component.parts.full.extent.width > component.parts.full.extent.height
+            // note that we consider portrait orientation the "default", and will rotate
+            // any other orientation to fit this; i.e. a card that is oriented as landscape will
+            // be rotated to fit in a portrait-oriented position
             let portraitBounds = component.portraitOrientedExtent
             let w = portraitBounds.width.css
             let h = portraitBounds.height.css
