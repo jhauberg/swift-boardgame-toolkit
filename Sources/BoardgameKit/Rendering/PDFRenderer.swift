@@ -1,7 +1,7 @@
 import Foundation
 import WebKit
 #if os(macOS)
-import Quartz.PDFKit
+    import Quartz.PDFKit
 #endif
 
 final class PDFRenderer: Renderer {
@@ -10,7 +10,7 @@ final class PDFRenderer: Renderer {
     private let locationUrl: URL
     private let destinationUrl: URL
 
-    init(locationUrl: URL, destinationUrl: URL, paper: Paper,  meta: SheetDescription?) {
+    init(locationUrl: URL, destinationUrl: URL, paper: Paper, meta: SheetDescription?) {
         self.paper = paper
         self.meta = meta
         self.destinationUrl = destinationUrl
@@ -38,30 +38,31 @@ final class PDFRenderer: Renderer {
 
     private func attachMetadata() {
         #if os(macOS)
-        guard let doc = PDFDocument(url: destinationUrl),
-              var metadata = doc.documentAttributes else {
-            fatalError()
-        }
-        do {
-            try FileManager.default.removeItem(at: destinationUrl)
-        } catch {
-            fatalError()
-        }
-        metadata[PDFDocumentAttribute.creatorAttribute] =
-            "swift-boardgame-toolkit \(BoardgameKit.version)"
-        if let title = meta?.title {
-            metadata[PDFDocumentAttribute.titleAttribute] = title
-        }
-        if let author = meta?.author {
-            metadata[PDFDocumentAttribute.authorAttribute] = author
-        }
-        if let copyright = meta?.copyright {
-            metadata[PDFDocumentAttribute.subjectAttribute] = copyright
-        }
-        doc.documentAttributes = metadata
-        if !doc.write(to: destinationUrl) {
-            fatalError()
-        }
+            guard let doc = PDFDocument(url: destinationUrl),
+                  var metadata = doc.documentAttributes
+            else {
+                fatalError()
+            }
+            do {
+                try FileManager.default.removeItem(at: destinationUrl)
+            } catch {
+                fatalError()
+            }
+            metadata[PDFDocumentAttribute.creatorAttribute] =
+                "swift-boardgame-toolkit \(BoardgameKit.version)"
+            if let title = meta?.title {
+                metadata[PDFDocumentAttribute.titleAttribute] = title
+            }
+            if let author = meta?.author {
+                metadata[PDFDocumentAttribute.authorAttribute] = author
+            }
+            if let copyright = meta?.copyright {
+                metadata[PDFDocumentAttribute.subjectAttribute] = copyright
+            }
+            doc.documentAttributes = metadata
+            if !doc.write(to: destinationUrl) {
+                fatalError()
+            }
         #endif
     }
 

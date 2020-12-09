@@ -6,11 +6,16 @@ final class ProofRenderer: Renderer {
     private let paper: Paper
     private let pages: [Page]
 
-    init(configuration: DocumentConfiguration, pages: [Page], destinationUrl: URL?, resourceUrl: URL?) throws {
+    init(
+        configuration: DocumentConfiguration,
+        pages: [Page],
+        destinationUrl: URL?,
+        resourceUrl: URL?
+    ) throws {
         self.pages = pages
-        self.paper = configuration.paper
+        paper = configuration.paper
         self.resourceUrl = resourceUrl
-        self.directoryUrl = destinationUrl ?? URL(
+        directoryUrl = destinationUrl ?? URL(
             fileURLWithPath: FileManager.default.currentDirectoryPath
         )
     }
@@ -25,7 +30,7 @@ final class ProofRenderer: Renderer {
         // remove any existing directory; note that we don't need to handle "no such file" exception
         try? FileManager.default.removeItem(at: siteUrl)
         guard let templateSiteUrl = Bundle.module.resourceURL?
-                .appendingPathComponent("templates/proof")
+            .appendingPathComponent("templates/proof")
         else {
             fatalError()
         }

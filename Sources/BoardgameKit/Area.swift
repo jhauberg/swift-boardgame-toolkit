@@ -47,10 +47,10 @@ public struct Area: Dimensioned {
         precondition(extent.width.value >= 0)
         precondition(extent.height.value >= 0)
         // apply insets + parent insets
-        self.inset.top = t + area.top
-        self.inset.left = l + area.left
-        self.inset.right = r + area.right
-        self.inset.bottom = b + area.bottom
+        inset.top = t + area.top
+        inset.left = l + area.left
+        inset.right = r + area.right
+        inset.bottom = b + area.bottom
     }
 
     public init(

@@ -17,8 +17,8 @@
  Jokers should have their own design to be easily dinstinguishable from ranked cards.
  */
 
-import Foundation
 import BoardgameKit
+import Foundation
 
 enum Suit: String, CaseIterable {
     case clubs = "♣"
@@ -44,7 +44,7 @@ let ranks = ["A", "2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K"]
 // define a function to compose a card
 func card(_ suit: Suit, _ rank: String) -> Component {
     // note that we remove any bleed to allow fitting more cards per page
-    return Component(width: 2.5.inches, height: 3.5.inches, bleed: 0.inches) { parts in
+    Component(width: 2.5.inches, height: 3.5.inches, bleed: 0.inches) { parts in
         // define an area inside the safe zone, inset by a small distance
         let innerFrameArea = Area(inset: 1.millimeters, in: parts.safe)
 
@@ -102,7 +102,7 @@ try sheet.document(
     configuration: .portrait(on: .a4, arranging: [
         // note that we don't need to explicitly specify to skip backs in this case,
         // as we have not actually composed any backsides
-        Layout(cards, method: .natural(orderedBy: .skippingBacks))
+        Layout(cards, method: .natural(orderedBy: .skippingBacks)),
     ])
 )
 // if all went well, the pdf should now be located at the printed path

@@ -9,7 +9,7 @@ struct Inset {
 
     var top: Distance? {
         didSet {
-            if top != nil && mutuallyExclusiveOpposites {
+            if top != nil, mutuallyExclusiveOpposites {
                 bottom = nil
             }
         }
@@ -17,7 +17,7 @@ struct Inset {
 
     var left: Distance? {
         didSet {
-            if left != nil && mutuallyExclusiveOpposites {
+            if left != nil, mutuallyExclusiveOpposites {
                 right = nil
             }
         }
@@ -25,7 +25,7 @@ struct Inset {
 
     var right: Distance? {
         didSet {
-            if right != nil && mutuallyExclusiveOpposites {
+            if right != nil, mutuallyExclusiveOpposites {
                 left = nil
             }
         }
@@ -33,7 +33,7 @@ struct Inset {
 
     var bottom: Distance? {
         didSet {
-            if bottom != nil && mutuallyExclusiveOpposites {
+            if bottom != nil, mutuallyExclusiveOpposites {
                 top = nil
             }
         }

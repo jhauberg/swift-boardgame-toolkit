@@ -19,17 +19,18 @@ final class ImageRenderer: Renderer {
 
     init(configuration: ImagesConfiguration, destinationUrl: URL?, resourceUrl: URL?) throws {
         guard let templateUrl = Bundle.module.resourceURL?
-                .appendingPathComponent("templates/render/index.html") else {
+            .appendingPathComponent("templates/render/index.html")
+        else {
             fatalError()
         }
 
         template = try String(contentsOf: templateUrl, encoding: .utf8)
 
-        self.dpi = Double(configuration.dpi)
-        self.format = configuration.format
-        self.queue = configuration.components.reversed()
+        dpi = Double(configuration.dpi)
+        format = configuration.format
+        queue = configuration.components.reversed()
         self.resourceUrl = resourceUrl
-        self.directoryUrl = destinationUrl ?? URL(
+        directoryUrl = destinationUrl ?? URL(
             fileURLWithPath: FileManager.default.currentDirectoryPath
         ).appendingPathComponent("images")
 
@@ -79,7 +80,9 @@ final class ImageRenderer: Renderer {
             rendition: Rendition(
                 index: 1 + indexOffset, // start from 1; not zero- just a preference for files
                 component: component,
-                format: format))
+                format: format
+            )
+        )
     }
 }
 
@@ -131,7 +134,8 @@ extension ImageRenderer: WKNavigationDelegate {
             }
 
             let fileUrl = self.directoryUrl.appendingPathComponent(
-                String(format: rendition.format, rendition.index).appending(".png"))
+                String(format: rendition.format, rendition.index).appending(".png")
+            )
 
             do {
                 try fileData.write(to: fileUrl, options: .atomic)
@@ -146,7 +150,9 @@ extension ImageRenderer: WKNavigationDelegate {
                     rendition: Rendition(
                         index: rendition.index, // note using same index; i.e. not incrementing
                         component: back,
-                        format: rendition.format + "_back"))
+                        format: rendition.format + "_back"
+                    )
+                )
             } else {
                 self.render()
             }

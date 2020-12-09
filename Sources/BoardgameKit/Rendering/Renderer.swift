@@ -12,7 +12,7 @@ class Renderer: NSObject {
         webView = WKWebView(frame: .zero, configuration: config)
     }
 
-    // todo: preferably protected; only subclasses should have access here
+    // TODO: preferably protected; only subclasses should have access here
     func beginRendering() {
         hasFinishedRendering = false
         while RunLoop.current.run(mode: .default, before: .distantFuture) {
@@ -26,7 +26,7 @@ class Renderer: NSObject {
         fatalError("must be called on subclass")
     }
 
-    // todo: preferably protected; only subclasses should have access here
+    // TODO: preferably protected; only subclasses should have access here
     func finishRendering() {
         hasFinishedRendering = true
     }
