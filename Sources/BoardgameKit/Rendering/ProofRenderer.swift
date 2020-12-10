@@ -35,12 +35,24 @@ final class ProofRenderer: Renderer {
             fatalError()
         }
         try FileManager.default.copyItem(at: templateSiteUrl, to: siteUrl)
-        if let assetsUrl = resourceUrl?.appendingPathComponent("assets") {
-            try FileManager.default.copyItem(
-                at: assetsUrl, to: siteUrl.appendingPathComponent("assets")
+        // provided that an URL for .bundle/Contents/Resources has been specified,
+        // copy over all files as-is to the proof/site directory
+        if let resourceUrl = resourceUrl {
+            let resourceUrls = try FileManager.default.contentsOfDirectory(
+                at: resourceUrl,
+                includingPropertiesForKeys: [],
+                options: [.skipsHiddenFiles]
             )
+            for resource in resourceUrls {
+                #if DEBUG
+                print("Copying \"\(resource.lastPathComponent)\" ...")
+                #endif
+                try FileManager.default.copyItem(
+                    at: resource,
+                    to: siteUrl.appendingPathComponent(resource.lastPathComponent)
+                )
+            }
         }
-
         let indexUrl = siteUrl.appendingPathComponent("index.html")
         let index = try String(contentsOf: indexUrl, encoding: .utf8)
 
