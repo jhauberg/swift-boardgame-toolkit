@@ -18,6 +18,7 @@
  many you want.
 
  Jokers should have their own design to be easily dinstinguishable from ranked cards.
+ However, they should also share the same back as the ranked cards.
  */
 
 import BoardgameKit
