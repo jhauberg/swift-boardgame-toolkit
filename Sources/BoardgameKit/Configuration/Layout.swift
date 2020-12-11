@@ -24,10 +24,14 @@ public struct Layout {
         case .skippingBacks:
             return components
         case .frontsThenBacks:
-            return components + components.compactMap(\.back)
+            // would prefer using \.back key path here, but causes build error
+            // see https://github.com/jhauberg/swift-boardgame-toolkit/issues/1
+            return components + components.compactMap { $0.back }
         case .interleavingBacks:
             return components.interleaved(
-                with: components.compactMap(\.back)
+                // would prefer using \.back key path here, but causes build error
+                // see https://github.com/jhauberg/swift-boardgame-toolkit/issues/1
+                with: components.compactMap { $0.back }
             )
         }
     }
