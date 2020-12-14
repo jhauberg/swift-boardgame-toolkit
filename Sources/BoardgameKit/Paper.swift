@@ -11,8 +11,6 @@ public struct Paper: Dimensioned {
              height: extent.height - margin.height * 2)
     }
 
-    // note that a paper must be initialized portrait-oriented;
-    // landscape is produced by flipping the dimensions
     public init(_ size: Size, _ margin: Margin) {
         extent = size
         self.margin = margin

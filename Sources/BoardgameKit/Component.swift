@@ -46,6 +46,9 @@ public struct Component: Dimensioned {
     private let trim: Distance
     private let bleed: Distance
 
+    /**
+     The bounds and physical, and final, size of the component after being cut.
+     */
     private(set) var extent: Size
     private(set) var elements: [Element] = []
 
@@ -60,9 +63,13 @@ public struct Component: Dimensioned {
     // was laid out on a page; which, in this case, happened twice)
     @Indirect private(set) var back: Component?
 
+    /**
+     The distinct areas within and surrounding the bounds of the component,
+     taking into account both `bleed` and `trim`.
+     */
     let parts: Partition
     /**
-     The physical dimensions of this component when oriented such that its longest edge goes
+     The physical dimensions of the component when oriented such that its longest edge goes
      vertically.
 
      For example, a component that is wider than it is tall, would have its dimensions flipped
@@ -72,13 +79,13 @@ public struct Component: Dimensioned {
     let portraitOrientedExtent: Size
 
     /**
-     Initializes a new boardgame component.
+     Initializes a new and empty boardgame component.
 
      - Parameters:
        - size: The physical dimensions of the component.
        - bleed: The distance extending outwards from the final, cut dimensions of the component.
        - trim: The distance extending inwards from the final, cut dimensions of the component.
-     - Returns: A fully-formed boardgame component, ready to be laid out on a page.
+     - Returns: A feature-less component.
      */
     init(
         size: Size,
@@ -119,9 +126,9 @@ public struct Component: Dimensioned {
        - height: The physical height of the component.
        - bleed: The distance extending outwards from the final, cut dimensions of the component.
        - trim: The distance extending inwards from the final, cut dimensions of the component.
-       - form: The composition of elements that form the component.
+       - form: The composition of features that form the component.
        - parts: The distinct areas that make up the component.
-     - Returns: A discrete component, ready to be arranged on a page.
+     - Returns: A component with any number of features.
      */
     public init(
         width: Distance,
@@ -148,8 +155,9 @@ public struct Component: Dimensioned {
      Form a component to represent the backside to this frontside.
 
      - Parameters:
-       - form: The composition of elements that form the component.
-       - area: The distinct areas that make up the component.
+       - form: The composition of features that form the component.
+       - parts: The distinct areas that make up the component.
+     - Returns: The component itself with a backside representation.
      */
     public func backside(@FeatureBuilder _ form: (_ parts: Partition) -> Feature) -> Self {
         back = Component(
@@ -164,19 +172,21 @@ public struct Component: Dimensioned {
 
     /**
      Set the component that represents the backside to this frontside.
+
+     - Parameters:
+       - component: The component to set as backside.
+     - Returns: The component itself with a backside representation.
      */
-    public func backside(using component: Component) -> Self {
+    public func backside(_ component: Component) -> Self {
         guard component.back == nil else {
-            print("warning: using frontside component as backside; back not set")
-            return self
+            fatalError()
         }
         guard component.extent.width == extent.width,
               component.extent.height == extent.height,
               component.bleed == bleed,
-              trim == trim
+              component.trim == trim
         else {
-            print("warning: backside dimensions differ from frontside; back not set")
-            return self
+            fatalError()
         }
         back = component
         return self
@@ -189,12 +199,16 @@ public struct Component: Dimensioned {
     }
 
     /**
-     Specify the style of cut guides for this component.
+     Specify the preference and style of cut guides.
 
      The default style for any component is corner crosshairs. A `nil` style indicates that
      this component should never have any cut guides applied to it.
 
      Note that any associated backside does not inherit the style specified here.
+
+     - Parameters:
+       - style: The style of guide to use.
+     - Returns: A copy of this component with the given style preference.
      */
     public func guides(_ style: GuideStyle?) -> Self {
         var copy = self
@@ -202,6 +216,16 @@ public struct Component: Dimensioned {
         return copy
     }
 
+    /**
+     Add a feature.
+
+     Use this method to add features _after_ initial composition.
+     Features added this way will always be on top of previously added or composited features.
+
+     - Parameters:
+       - feature: The feature to add.
+     - Returns: A copy of this component with the added feature.
+     */
     func with(feature: Feature) -> Self {
         var copy = self
         copy.elements.append(
@@ -210,12 +234,27 @@ public struct Component: Dimensioned {
         return copy
     }
 
+    /**
+     Add a composition of features.
+
+     - Parameters:
+       - form: The composition of features.
+       - parts: The distinct areas that make up the component.
+     - Returns: A copy of this component with the added features.
+     */
     func with(@FeatureBuilder _ form: (_ parts: Partition) -> Feature) -> Self {
         return with(feature: form(parts))
     }
 
     /**
-     Returns the backside of this component for proofing.
+     Create a backside with features added for proofing.
+
+     If a back has been set, this method will return a copy of that component.
+     Otherwise, an identical, but feature-less, component will be used instead.
+
+     - Parameters:
+       - guides: A flag to determine whether this side should include guides.
+     - Returns: A component with features added for proofing.
      */
     func back(with guides: GuideDistribution) -> Component {
         // an "empty" back should never show overlays to indicate that it is, indeed,
@@ -228,7 +267,11 @@ public struct Component: Dimensioned {
     }
 
     /**
-     Returns the frontside of this component for proofing.
+     Create a frontside with features added for proofing.
+
+     - Parameters:
+       - guides: A flag to determine whether this side should include guides.
+     - Returns: A copy of this component with features added for proofing.
      */
     func front(with guides: GuideDistribution) -> Component {
         let frontside = addingOverlays()
@@ -239,7 +282,7 @@ public struct Component: Dimensioned {
     }
 
     /**
-     Returns an empty component, identical to this component in both dimensions and partitioning.
+     Returns a new, feature-less component, identical in both dimensions and partitioning.
      */
     private var removingElements: Component {
         Component(size: extent, bleed: bleed, trim: trim)
