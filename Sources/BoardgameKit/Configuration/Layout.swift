@@ -15,10 +15,6 @@ public struct Layout {
         self.method = method
     }
 
-    public init(_ components: ArraySlice<Component>, method: Method) {
-        self.init(Array(components), method: method)
-    }
-
     func components(orderedBy order: Order) -> [Component] {
         switch order {
         case .skippingBacks:
@@ -34,6 +30,12 @@ public struct Layout {
                 with: components.compactMap { $0.back }
             )
         }
+    }
+}
+
+extension Layout {
+    public init(_ components: ArraySlice<Component>, method: Method) {
+        self.init(Array(components), method: method)
     }
 }
 
