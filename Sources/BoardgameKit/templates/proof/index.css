@@ -41,7 +41,6 @@ html, body {
 .guide {
     position: absolute;
     pointer-events: none;
-    /*visibility: hidden;*/ /* we could hide these for preview */
 }
 
 .do-not-print {
