@@ -202,6 +202,18 @@ public struct Component: Dimensioned {
         return copy
     }
 
+    func with(feature: Feature) -> Self {
+        var copy = self
+        copy.elements.append(
+            contentsOf: feature.elements
+        )
+        return copy
+    }
+
+    func with(@FeatureBuilder _ form: (_ parts: Partition) -> Feature) -> Self {
+        return with(feature: form(parts))
+    }
+
     /**
      Returns the backside of this component for proofing.
      */
@@ -259,10 +271,9 @@ extension Component {
 
 extension Component {
     private func addingOverlays() -> Self {
-        var copy = self
         let cornerRadius = 0.125.inches
         let borderWidth = 0.5.millimeters
-        copy.elements.append(
+        return with { parts in
             Box(covering: parts.real)
                 .border("crimson", width: borderWidth)
                 // note use of outer-border here; if we instead covered the bleed using a
@@ -274,18 +285,14 @@ extension Component {
                 .outline("rgba(220, 20, 60, 0.25)", width: bleed + cornerRadius)
                 .corners(radius: cornerRadius)
                 .classed("do-not-print")
-                .element
-        )
-        if trim > .zero {
-            copy.elements.append(
+
+            if trim > .zero {
                 Box(covering: parts.safe)
                     .border("royalblue", width: borderWidth, style: .dashed)
                     .corners(radius: cornerRadius)
                     .classed("do-not-print")
-                    .element
-            )
+            }
         }
-        return copy
     }
 }
 
@@ -303,8 +310,6 @@ extension Component {
     }
 
     private func addingMarks(style: GuideStyle) -> Self {
-        var copy = self
-
         // set the width of the guide
         // note that in order to make the best opportunity for accurate alignment in all scenarios,
         // this should correspond to the distance that most closely maps to a pixel in browser space
@@ -322,19 +327,18 @@ extension Component {
 
         switch style {
         case let .boxed(color):
-            copy.elements.append(
+            return with { parts in
                 Box(covering: Area(inset: inset, in: parts.real))
                     .border(color, width: trimWidth, style: border, edges: .all)
                     .classed("guide")
-                    .element
-            )
+            }
         case let .extendedEdges(color):
             let extent = trimWidth * 5
             // set an additional distance to extend beyond the extent
             // note that this only prevents overlap into neighboring components if the arranged
             // components are of similar size and setup
             let reach = bleed
-            copy.elements.append(
+            return with { parts in
                 Box(covering:
                         Area(top: inset,
                              left: inset - extent - reach,
@@ -343,9 +347,6 @@ extension Component {
                              in: parts.real))
                     .border(color, width: trimWidth, style: border, edges: [.top, .bottom])
                     .classed("guide")
-                    .element
-            )
-            copy.elements.append(
                 Box(covering:
                         Area(top: inset - extent - reach,
                              left: inset,
@@ -354,84 +355,62 @@ extension Component {
                              in: parts.real))
                     .border(color, width: trimWidth, style: border, edges: [.left, .right])
                     .classed("guide")
-                    .element
-            )
+            }
         case let .crosshair(color):
             let extent = trimWidth * 5
             // set an additional distance to extend beyond the extent
             // note that this only prevents overlap into neighboring components if the arranged
             // components are of similar size and setup
             let reach = bleed
-            // top-left
-            copy.elements.append(
+            return with { parts in
+                // top-left
                 Box(width: (extent * 2) + reach, height: extent)
                     .left(parts.real.left + inset - extent - reach)
                     .top(parts.real.top + inset)
                     .border(color, width: trimWidth, style: border, edges: [.top])
                     .classed("guide")
-                    .element
-            )
-            copy.elements.append(
                 Box(width: extent, height: (extent * 2) + reach)
                     .left(parts.real.left + inset)
                     .top(parts.real.top + inset - extent - reach)
                     .border(color, width: trimWidth, style: border, edges: .left)
                     .classed("guide")
-                    .element
-            )
-            // top-right
-            copy.elements.append(
-                Box(width: (extent * 2) + reach, height: extent)
-                    .right(parts.real.right + inset - extent - reach)
-                    .top(parts.real.top + inset)
-                    .border(color, width: trimWidth, style: border, edges: [.top])
-                    .classed("guide")
-                    .element
-            )
-            copy.elements.append(
-                Box(width: extent, height: (extent * 2) + reach)
-                    .right(parts.real.right + inset)
-                    .top(parts.real.top + inset - extent - reach)
-                    .border(color, width: trimWidth, style: border, edges: .right)
-                    .classed("guide")
-                    .element
-            )
-            // bottom-left
-            copy.elements.append(
-                Box(width: (extent * 2) + reach, height: extent)
-                    .left(parts.real.left + inset - extent - reach)
-                    .bottom(parts.real.bottom + inset)
-                    .border(color, width: trimWidth, style: border, edges: [.bottom])
-                    .classed("guide")
-                    .element
-            )
-            copy.elements.append(
-                Box(width: extent, height: (extent * 2) + reach)
-                    .left(parts.real.left + inset)
-                    .bottom(parts.real.bottom + inset - extent - reach)
-                    .border(color, width: trimWidth, style: border, edges: .left)
-                    .classed("guide")
-                    .element
-            )
-            // bottom-right
-            copy.elements.append(
-                Box(width: (extent * 2) + reach, height: extent)
-                    .right(parts.real.right + inset - extent - reach)
-                    .bottom(parts.real.bottom + inset)
-                    .border(color, width: trimWidth, style: border, edges: [.bottom])
-                    .classed("guide")
-                    .element
-            )
-            copy.elements.append(
-                Box(width: extent, height: (extent * 2) + reach)
-                    .right(parts.real.right + inset)
-                    .bottom(parts.real.bottom + inset - extent - reach)
-                    .border(color, width: trimWidth, style: border, edges: .right)
-                    .classed("guide")
-                    .element
-            )
-        }
 
-        return copy
+                // top-right
+                Box(width: (extent * 2) + reach, height: extent)
+                    .right(parts.real.right + inset - extent - reach)
+                    .top(parts.real.top + inset)
+                    .border(color, width: trimWidth, style: border, edges: [.top])
+                    .classed("guide")
+                Box(width: extent, height: (extent * 2) + reach)
+                    .right(parts.real.right + inset)
+                    .top(parts.real.top + inset - extent - reach)
+                    .border(color, width: trimWidth, style: border, edges: .right)
+                    .classed("guide")
+
+                // bottom-left
+                Box(width: (extent * 2) + reach, height: extent)
+                    .left(parts.real.left + inset - extent - reach)
+                    .bottom(parts.real.bottom + inset)
+                    .border(color, width: trimWidth, style: border, edges: [.bottom])
+                    .classed("guide")
+                Box(width: extent, height: (extent * 2) + reach)
+                    .left(parts.real.left + inset)
+                    .bottom(parts.real.bottom + inset - extent - reach)
+                    .border(color, width: trimWidth, style: border, edges: .left)
+                    .classed("guide")
+
+                // bottom-right
+                Box(width: (extent * 2) + reach, height: extent)
+                    .right(parts.real.right + inset - extent - reach)
+                    .bottom(parts.real.bottom + inset)
+                    .border(color, width: trimWidth, style: border, edges: [.bottom])
+                    .classed("guide")
+                Box(width: extent, height: (extent * 2) + reach)
+                    .right(parts.real.right + inset)
+                    .bottom(parts.real.bottom + inset - extent - reach)
+                    .border(color, width: trimWidth, style: border, edges: .right)
+                    .classed("guide")
+            }
+        }
     }
 }
