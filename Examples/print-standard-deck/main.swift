@@ -110,7 +110,7 @@ func card(_ suit: Suit, _ rank: String) -> Component {
                so dimensions must be specified to take up the space we want to fill (all of it)
                this also requires the Freeform feature itself to have an explicit width and height
               -->
-            <div class=\"striped\" style=\"width: 100%; height: 100%;\"></div>
+            <div class="striped" style="width: 100%; height: 100%;"></div>
             """
         )
             .width(parts.full.extent.width)
