@@ -126,8 +126,8 @@ public struct Sheet {
                 }
 
                 let frontPages = fronts.arrangedLeftToRight(
-                    spacing: gap,
-                    on: configuration.paper
+                    on: configuration.paper,
+                    spacing: gap
                 )
 
                 pages.append(contentsOf: frontPages)
@@ -140,8 +140,8 @@ public struct Sheet {
                 }
 
                 let frontPages = fronts.arrangedLeftToRight(
-                    spacing: gap,
-                    on: configuration.paper
+                    on: configuration.paper,
+                    spacing: gap
                 )
 
                 let backs = fronts.map { front in
@@ -149,8 +149,8 @@ public struct Sheet {
                 }
 
                 let backPages = backs.arrangedLeftToRight(
-                    spacing: gap,
                     on: configuration.paper,
+                    spacing: gap,
                     reverse: true
                 )
 
@@ -195,8 +195,8 @@ public struct Sheet {
                 // layout components in "pages" based on a marginless paper specification
                 // exactly fitting the previously determined boundaries
                 let upperPages = fronts.arrangedLeftToRight(
-                    spacing: gap,
-                    on: Paper(boundedSize, Margin.zero)
+                    on: Paper(boundedSize, Margin.zero),
+                    spacing: gap
                 )
 
                 for arrangedPage in upperPages {
@@ -355,8 +355,8 @@ private extension Array where Element == Layout {
 
 private extension Array where Element == Component {
     func arrangedLeftToRight(
-        spacing: Size,
         on paper: Paper,
+        spacing: Size,
         reverse: Bool = false
     ) -> [Page] {
         precondition(spacing.width.value >= 0)
