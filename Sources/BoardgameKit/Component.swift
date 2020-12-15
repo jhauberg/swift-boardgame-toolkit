@@ -47,7 +47,7 @@ public struct Component: Dimensioned {
     private let bleed: Distance
 
     /**
-     The bounds and physical, and final, size of the component after being cut.
+     The physical and final size of the component after being cut.
      */
     private(set) var extent: Size
     private(set) var elements: [Element] = []
@@ -236,7 +236,7 @@ public struct Component: Dimensioned {
        - feature: The feature to add.
      - Returns: A copy of this component with the added feature.
      */
-    func with(feature: Feature) -> Self {
+    private func with(feature: Feature) -> Self {
         var copy = self
         copy.elements.append(
             contentsOf: feature.elements
@@ -251,7 +251,7 @@ public struct Component: Dimensioned {
        - form: The composition of features.
      - Returns: A copy of this component with the added features.
      */
-    func with(@FeatureBuilder _ form: FeatureComposition) -> Self {
+    private func with(@FeatureBuilder _ form: FeatureComposition) -> Self {
         guard let feature = form(parts) else {
             return self
         }
