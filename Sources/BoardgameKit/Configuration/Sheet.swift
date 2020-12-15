@@ -16,10 +16,6 @@ public struct SheetDescription {
     }
 }
 
-public enum SheetError: Error {
-    case outOfBounds(size: Size)
-}
-
 public struct Sheet {
     public let description: SheetDescription?
 
@@ -60,7 +56,7 @@ public struct Sheet {
         }
         switch target {
         case let .proof(url):
-            let pages = try arrange(using: configuration)
+            let pages = arrange(using: configuration)
 
             let doc = try ProofRenderer(
                 configuration: configuration,
@@ -97,20 +93,7 @@ public struct Sheet {
         }
     }
 
-    private func arrange(using configuration: DocumentConfiguration) throws -> [Page] {
-        let allComponents: [Component] = configuration.layouts.flatMap {
-            $0.components(orderedBy: .frontsThenBacks)
-        }
-
-        if let component = allComponents.first(
-            where: { $0.portraitOrientedExtent.width > configuration.paper.innerBounds.width ||
-                $0.portraitOrientedExtent.height > configuration.paper.innerBounds.height
-            }
-        ) {
-            // a component won't fit on a page inside bounds
-            throw SheetError.outOfBounds(size: component.portraitOrientedExtent)
-        }
-
+    private func arrange(using configuration: DocumentConfiguration) -> [Page] {
         var pages: [Page] = []
 
         let layouts = configuration.layouts.splitBySize
@@ -407,6 +390,11 @@ private extension Array where Element == Component {
         }
 
         for component in self {
+            guard component.portraitOrientedExtent.width <= paper.innerBounds.width,
+                  component.portraitOrientedExtent.height <= paper.innerBounds.height else {
+                // component does not fit on this paper
+                fatalError()
+            }
             let offset = Size(width: x, height: y)
 
             // temporarily store offset and component before laying out on page;
