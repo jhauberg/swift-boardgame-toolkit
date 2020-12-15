@@ -119,6 +119,18 @@ public struct Component: Dimensioned {
     }
 
     /**
+     Represents a composition of features.
+
+     Note that we prefer to have an optional return value, rather than making the closure itself
+     optional. This allows for conditional composition where some cases might be feature-less.
+
+     - Parameters:
+       - parts: The distinct areas that represent the boundaries of this composition.
+     - Returns: A feature, or `nil` indicating a feature-less composition.
+     */
+    public typealias FeatureComposition = (_ parts: Partition) -> Feature?
+
+    /**
      Initializes a new and discrete boardgame component.
 
      - Parameters:
@@ -127,7 +139,6 @@ public struct Component: Dimensioned {
        - bleed: The distance extending outwards from the final, cut dimensions of the component.
        - trim: The distance extending inwards from the final, cut dimensions of the component.
        - form: The composition of features that form the component.
-       - parts: The distinct areas that make up the component.
      - Returns: A component with any number of features.
      */
     public init(
@@ -135,7 +146,7 @@ public struct Component: Dimensioned {
         height: Distance,
         bleed: Distance = 0.125.inches,
         trim: Distance = 0.125.inches,
-        @FeatureBuilder _ form: (_ parts: Partition) -> Feature? = { _ in
+        @FeatureBuilder _ form: FeatureComposition = { _ in
             nil
         }
     ) {
@@ -156,10 +167,9 @@ public struct Component: Dimensioned {
 
      - Parameters:
        - form: The composition of features that form the component.
-       - parts: The distinct areas that make up the component.
      - Returns: The component itself with a backside representation.
      */
-    public func backside(@FeatureBuilder _ form: (_ parts: Partition) -> Feature) -> Self {
+    public func backside(@FeatureBuilder _ form: FeatureComposition) -> Self {
         back = Component(
             width: extent.width,
             height: extent.height,
@@ -239,11 +249,13 @@ public struct Component: Dimensioned {
 
      - Parameters:
        - form: The composition of features.
-       - parts: The distinct areas that make up the component.
      - Returns: A copy of this component with the added features.
      */
-    func with(@FeatureBuilder _ form: (_ parts: Partition) -> Feature) -> Self {
-        return with(feature: form(parts))
+    func with(@FeatureBuilder _ form: FeatureComposition) -> Self {
+        guard let feature = form(parts) else {
+            return self
+        }
+        return with(feature: feature)
     }
 
     /**
