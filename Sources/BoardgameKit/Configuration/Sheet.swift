@@ -355,11 +355,12 @@ private extension Array where Element == Layout {
 
 private extension Array where Element == Component {
     func arrangedLeftToRight(
-        spacing: Measurement<UnitLength>,
+        spacing: Size,
         on paper: Paper,
         reverse: Bool = false
     ) -> [Page] {
-        precondition(spacing.value >= 0)
+        precondition(spacing.width.value >= 0)
+        precondition(spacing.height.value >= 0)
 
         var pages: [Page] = []
 
@@ -417,14 +418,14 @@ private extension Array where Element == Component {
             content.append((offset, component))
 
             // increment positions
-            x = offset.width + (component.portraitOrientedExtent.width + spacing)
+            x = offset.width + (component.portraitOrientedExtent.width + spacing.width)
 
             // note using 'x', not offset.width
             let nextRightEdge = x + component.portraitOrientedExtent.width
             if nextRightEdge > paper.innerBounds.width {
                 // next line
                 x = origin.width
-                y = offset.height + (component.portraitOrientedExtent.height + spacing)
+                y = offset.height + (component.portraitOrientedExtent.height + spacing.height)
             }
 
             // note using 'y', not offset.height

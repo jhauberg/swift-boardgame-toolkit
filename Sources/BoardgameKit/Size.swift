@@ -4,6 +4,11 @@ public struct Size {
     public let width: Distance
     public let height: Distance
 
+    public init(width: Distance, height: Distance) {
+        self.width = width
+        self.height = height
+    }
+
     public static let zero = Size(width: .zero, height: .zero)
 
     static func containingOffsets(_ offsets: [Size]) -> Size {

@@ -48,7 +48,7 @@ extension Layout {
          */
         case natural(
                 orderedBy: Order = .frontsThenBacks,
-                gap: Distance = .zero
+                gap: Size = .zero
              )
         /**
          Arrange components such that fronts and backs go on odd and even pages, respectively,
@@ -68,7 +68,7 @@ extension Layout {
          For manual duplexing, may God be with you.
          */
         case duplex(
-                gap: Distance = .zero,
+                gap: Size = .zero,
                 guides: Component.GuideDistribution = .back
              )
         /**
@@ -91,7 +91,7 @@ extension Layout {
          If your printer has large margins, consider reducing the bleed or folding gutter.
          */
         case fold(
-                gap: Distance = .zero,
+                gap: Size = .zero,
                 gutter: Distance = 6.millimeters,
                 guides: Component.GuideDistribution = .back
              )
