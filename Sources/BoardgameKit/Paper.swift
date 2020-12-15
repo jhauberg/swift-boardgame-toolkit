@@ -6,14 +6,17 @@ public struct Paper: Dimensioned {
     public let extent: Size
     public let margin: Margin
 
-    var innerBounds: Size {
-        Size(width: extent.width - margin.width * 2,
-             height: extent.height - margin.height * 2)
-    }
+    let innerBounds: Size
 
     public init(_ size: Size, _ margin: Margin) {
-        extent = size
+        precondition(size.width > margin.width * 2)
+        precondition(size.height > margin.height * 2)
+        self.extent = size
         self.margin = margin
+        self.innerBounds = Size(
+            width: size.width - margin.width * 2,
+            height: size.height - margin.height * 2
+        )
     }
 
     public static let letter = Paper(
