@@ -164,6 +164,15 @@ public struct Component: Dimensioned {
     /**
      Form a component to represent the backside to this frontside.
 
+     Use this method to form and associate a new component to represent the backside of this
+     component (e.g. the frontside).
+
+     The backside does not inherit any properties from the frontside beyond dimensions and
+     partitioning. For example, if a custom guide style has been set, the backside does _not_
+     inherit this style.
+
+     - Note: Prefer using `backside(_ component:)` if the backside has any custom properties.
+
      - Parameters:
        - form: The composition of features that form the component.
      - Returns: The component itself with a backside representation.
@@ -182,8 +191,17 @@ public struct Component: Dimensioned {
     /**
      Set the component that represents the backside to this frontside.
 
+     Use this method to associate a component that represents the backside of this component
+     (e.g. the frontside).
+
+     The backside does not inherit any properties from the frontside. For example, if a custom
+     guide style has been set, the backside does _not_ inherit this style.
+
+     - Note: The component must match in both dimensions and partitioning, and must _not_ also act
+     as a frontside (i.e. having a back association).
+
      - Parameters:
-       - component: The component to set as backside.
+       - component: The component that represents the backside.
      - Returns: The component itself with a backside representation.
      */
     public func backside(_ component: Component) -> Self {
@@ -208,7 +226,7 @@ public struct Component: Dimensioned {
      The default style for any component is corner crosshairs. A `nil` style indicates that
      this component should never have any cut guides applied to it.
 
-     Note that any associated backside does not inherit the style specified here.
+     - Note: Any associated backside does not inherit the style specified here.
 
      - Parameters:
        - style: The style of guide to use.
@@ -224,6 +242,7 @@ public struct Component: Dimensioned {
      Add a feature.
 
      Use this method to add features _after_ initial composition.
+
      Features added this way will always be on top of previously added or composited features.
 
      - Parameters:
