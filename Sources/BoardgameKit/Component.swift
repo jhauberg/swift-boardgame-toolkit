@@ -154,11 +154,8 @@ public struct Component: Dimensioned {
             bleed: bleed,
             trim: trim
         )
-        if let elm = form(parts) {
-            elements.append(
-                contentsOf: elm.elements
-            )
-        }
+
+        self = with(form)
     }
 
     /**
@@ -265,10 +262,10 @@ public struct Component: Dimensioned {
      - Returns: A copy of this component with the added features.
      */
     private func with(@FeatureBuilder _ form: FeatureComposition) -> Self {
-        guard let feature = form(parts) else {
+        guard let composition = form(parts) else {
             return self
         }
-        return with(feature: feature)
+        return with(feature: composition)
     }
 
     /**
@@ -282,13 +279,13 @@ public struct Component: Dimensioned {
      - Returns: A component with features added for proofing.
      */
     func back(with guides: Guide.Distribution) -> Component {
-        // an "empty" back should never show overlays to indicate that it is, indeed,
-        // an empty back; however, it _should_ be able to show cut guides
+        // an "empty" back should never show overlays; this indicates that it is, indeed,
+        // an empty back, it _should_, however, be able to show cut guides
         let backside = back?.addingOverlays() ?? removingElements
-        guard let marks = backside.marks, guides != .front else {
+        guard let style = backside.marks, guides != .front else {
             return backside
         }
-        return backside.addingMarks(style: marks)
+        return backside.addingMarks(with: style)
     }
 
     /**
@@ -300,17 +297,10 @@ public struct Component: Dimensioned {
      */
     func front(with guides: Guide.Distribution) -> Component {
         let frontside = addingOverlays()
-        guard let marks = marks, guides != .back else {
+        guard let style = marks, guides != .back else {
             return frontside
         }
-        return frontside.addingMarks(style: marks)
-    }
-
-    /**
-     Returns a new, feature-less component, identical in both dimensions and partitioning.
-     */
-    private var removingElements: Component {
-        Component(size: extent, bleed: bleed, trim: trim)
+        return frontside.addingMarks(with: style)
     }
 }
 
@@ -321,6 +311,15 @@ final class Indirect<Value> {
     }
 
     var wrappedValue: Value
+}
+
+extension Component {
+    /**
+     Returns a new, feature-less component, identical in both dimensions and partitioning.
+     */
+    private var removingElements: Component {
+        Component(size: extent, bleed: bleed, trim: trim)
+    }
 }
 
 extension Component {
@@ -365,7 +364,7 @@ extension Component {
 }
 
 extension Component {
-    private func addingMarks(style: Guide.Style) -> Self {
+    private func addingMarks(with style: Guide.Style) -> Self {
         // set the width of the guide
         // note that in order to make the best opportunity for accurate alignment in all scenarios,
         // this should correspond to the distance that most closely maps to a pixel in browser space
