@@ -188,16 +188,11 @@ public struct Component: Dimensioned {
      - Returns: The component itself with a backside representation.
      */
     public func backside(_ component: Component) -> Self {
-        guard component.back == nil else {
-            fatalError()
-        }
-        guard component.extent.width == extent.width,
-              component.extent.height == extent.height,
-              component.bleed == bleed,
-              component.trim == trim
-        else {
-            fatalError()
-        }
+        precondition(component.back == nil)
+        precondition(component.extent.width == extent.width)
+        precondition(component.extent.height == extent.height)
+        precondition(component.bleed == bleed)
+        precondition(component.trim == trim)
         back = component
         return self
     }
