@@ -45,14 +45,13 @@ struct ComponentAttributes {
 public struct Component: Dimensioned {
     private let trim: Distance
     private let bleed: Distance
+    private var marks: Guide.Style? = .crosshair(color: "grey")
 
     /**
      The physical and final size of the component after being cut.
      */
     private(set) var extent: Size
     private(set) var elements: [Element] = []
-
-    private var marks: GuideStyle? = .crosshair(color: "grey")
 
     private(set) var attributes = ComponentAttributes()
     // using a property wrapper to allow for having a recursive type reference here
@@ -215,7 +214,7 @@ public struct Component: Dimensioned {
        - style: The style of guide to use.
      - Returns: A copy of this component with the given style preference.
      */
-    public func guides(_ style: GuideStyle?) -> Self {
+    public func guides(_ style: Guide.Style?) -> Self {
         var copy = self
         copy.marks = style
         return copy
@@ -263,7 +262,7 @@ public struct Component: Dimensioned {
        - guides: A flag to determine whether this side should include guides.
      - Returns: A component with features added for proofing.
      */
-    func back(with guides: GuideDistribution) -> Component {
+    func back(with guides: Guide.Distribution) -> Component {
         // an "empty" back should never show overlays to indicate that it is, indeed,
         // an empty back; however, it _should_ be able to show cut guides
         let backside = back?.addingOverlays() ?? removingElements
@@ -280,7 +279,7 @@ public struct Component: Dimensioned {
        - guides: A flag to determine whether this side should include guides.
      - Returns: A copy of this component with features added for proofing.
      */
-    func front(with guides: GuideDistribution) -> Component {
+    func front(with guides: Guide.Distribution) -> Component {
         let frontside = addingOverlays()
         guard let marks = marks, guides != .back else {
             return frontside
@@ -347,19 +346,7 @@ extension Component {
 }
 
 extension Component {
-    public enum GuideDistribution {
-        case front
-        case back
-        case frontAndBack
-    }
-
-    public enum GuideStyle {
-        case boxed(color: String)
-        case extendedEdges(color: String)
-        case crosshair(color: String)
-    }
-
-    private func addingMarks(style: GuideStyle) -> Self {
+    private func addingMarks(style: Guide.Style) -> Self {
         // set the width of the guide
         // note that in order to make the best opportunity for accurate alignment in all scenarios,
         // this should correspond to the distance that most closely maps to a pixel in browser space

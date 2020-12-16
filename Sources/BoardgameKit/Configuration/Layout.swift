@@ -262,7 +262,7 @@ extension Layout {
          */
         case duplex(
                 gap: Size = .zero,
-                guides: Component.GuideDistribution = .back
+                guides: Guide.Distribution = .back
              )
         /**
          Arrange components such that fronts and backs go on the same page, mirrored from a
@@ -286,7 +286,7 @@ extension Layout {
         case fold(
                 gap: Size = .zero,
                 gutter: Distance = 6.millimeters,
-                guides: Component.GuideDistribution = .back
+                guides: Guide.Distribution = .back
              )
         /**
          Arrange components in order, at pre-defined placements and orientations on a page.
