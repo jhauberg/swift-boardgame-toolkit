@@ -160,7 +160,7 @@ extension ImageRenderer: WKNavigationDelegate {
     }
 }
 
-extension NSImage {
+private extension NSImage {
     func resized(to size: NSSize) -> NSImage? {
         guard let bitmapRep = NSBitmapImageRep(
             bitmapDataPlanes: nil,
