@@ -266,7 +266,7 @@ public struct Component: Dimensioned {
         // an "empty" back should never show overlays to indicate that it is, indeed,
         // an empty back; however, it _should_ be able to show cut guides
         let backside = back?.addingOverlays() ?? removingElements
-        guard let marks = marks, guides != .front else {
+        guard let marks = backside.marks, guides != .front else {
             return backside
         }
         return backside.addingMarks(style: marks)
