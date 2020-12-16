@@ -19,9 +19,7 @@ struct Style {
         guard let existingValue = items[key] else {
             fatalError()
         }
-
         var v = value.trimmingCharacters(in: .whitespacesAndNewlines)
-
         if let end = v.last, end == ";" {
             v = String(v[..<v.endIndex])
         }

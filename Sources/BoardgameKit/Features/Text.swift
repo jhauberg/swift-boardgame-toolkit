@@ -116,13 +116,13 @@ extension Text: Centerable {
         var copy = self
         if axis == .horizontal || axis == .both {
             guard let width = width else {
-                fatalError()
+                preconditionFailure()
             }
             copy.inset.left = area.left + (area.extent.width / 2) - (width / 2)
         }
         if axis == .vertical || axis == .both {
             guard let height = height else {
-                fatalError()
+                preconditionFailure()
             }
             copy.inset.top = area.top + (area.extent.height / 2) - (height / 2)
         }
