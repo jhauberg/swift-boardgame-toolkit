@@ -33,12 +33,14 @@ struct ComponentAttributes {
  For example, the following component is formed with 2 features,
  however, only a black box would show:
 
-     Component(width: 2.5.inches, height: 3.5.inches) {
-        Text("My Card")
-            .color("white")
-        Box(covering: $0.full)
-            .background("black")
-     }
+ ```
+ Component(width: 2.5.inches, height: 3.5.inches) {
+    Text("My Card")
+        .color("white")
+    Box(covering: $0.full)
+        .background("black")
+ }
+ ```
 
  Swapping the order of the features would make white text appear on top of the black box.
  */
@@ -164,25 +166,34 @@ public struct Component: Dimensioned {
      Use this method to form and associate a new component to represent the backside of this
      component (e.g. the frontside).
 
-     The backside does not inherit any properties from the frontside beyond dimensions and
-     partitioning. For example, if a custom guide style has been set, the backside does _not_
-     inherit this style.
+     To apply custom properties; for example, flipping or guide style, provide a closure for
+     the `component` parameter:
 
-     - Note: Prefer using `backside(_ component:)` if the backside has any custom properties.
+     ```
+     backside(from: { back in back.flipped(axis: .vertical) }) { parts in
+         Text("This back is flipped")
+     }
+     ```
+
+     If a closure is omitted, a valid component (with default properties) is formed using the
+     provided feature composition.
+
+     - Note: The component returned in the closure must match the frontside in both dimensions and
+     partitioning, and must _not_ also act as a frontside (i.e. having a back association).
 
      - Parameters:
+       - component: A closure that returns a valid back component.
        - form: The composition of features that form the component.
      - Returns: The component itself with a backside representation.
      */
-    public func backside(@FeatureBuilder _ form: FeatureComposition) -> Self {
-        back = Component(
-            width: extent.width,
-            height: extent.height,
-            bleed: bleed,
-            trim: trim,
-            form
+    public func backside(
+        from component: ((_ back: Component) -> Component) = { back in back },
+        @FeatureBuilder form: FeatureComposition
+    ) -> Self {
+        return backside(
+            component(removingElements)
+                .with(form)
         )
-        return self
     }
 
     /**
@@ -315,7 +326,7 @@ final class Indirect<Value> {
 
 extension Component {
     /**
-     Returns a new, feature-less component, identical in both dimensions and partitioning.
+     Returns a new, feature-less component, identical only in dimensions and partitioning.
      */
     private var removingElements: Component {
         Component(size: extent, bleed: bleed, trim: trim)
