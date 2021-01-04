@@ -2,9 +2,9 @@
 
 A framework for modeling, prototyping and simulating boardgames.
 
-| [Latest release (0.3.0)](releases/tag/0.3.0) | Download the latest stable release.                 |
-| :------------------------------------------- | :-------------------------------------------------- |
-| [Issue tracker](issues)                      | Contribute your bugs, comments or feature requests. |
+| [Latest release (0.3.0)](https://github.com/jhauberg/swift-boardgame-toolkit/releases/tag/0.3.0) | Download the latest stable release.                 |
+| :----------------------------------------------------------------------------------------------- | :-------------------------------------------------- |
+| [Issue tracker](https://github.com/jhauberg/swift-boardgame-toolkit/issues)                      | Contribute your bugs, comments or feature requests. |
 
 # Features
 
@@ -53,8 +53,7 @@ This is similar in regard to layout; with a declarative approach you can be conf
 
 This is not a novel idea, and `swift-boardgame-toolkit` shares many similarities with tools like [nanDeck](http://www.nandeck.com) and [Squib](https://github.com/andymeneely/squib). 
 
-Though the thoughts behind this implementation might go a bit further, it all boils down to act as a sort-of glorified build script; define and model all parts of your game, simulate scenarios to validate game/balance and finally design and layout the physical components and arrange them on printable pages for human playtesting.
-
+Though the goals behind this implementation might go a bit further, it all boils down to act as a sort-of glorified build script; define and model all parts of your game, simulate scenarios to validate game/balance and finally design and layout the physical components and arrange them on printable pages for human playtesting.
 
 # Installation
 
@@ -82,8 +81,8 @@ Then, for any target, add `BoardgameKit` as a named dependency:
 # Learn More
 
  * Read the Documentation (_not available yet_)
- * Try the [Examples](tree/main/Examples)
- * Join the [Discussion](discussions)
+ * Try the [Examples](Examples)
+ * Join the [Discussion](https://github.com/jhauberg/swift-boardgame-toolkit/discussions)
 
 <br />
 
