@@ -300,7 +300,10 @@ extension Layout {
          For example, this could be used to match the layout of a specific die-cutter,
          or to print on pre-cut/perforated paper.
          */
-        case custom(orderedBy: Order, _ arrangements: [Arrangement])
+        case custom(
+                orderedBy: Order,
+                _ arrangements: [Arrangement]
+             )
     }
 }
 

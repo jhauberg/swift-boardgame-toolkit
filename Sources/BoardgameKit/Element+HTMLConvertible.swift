@@ -297,6 +297,7 @@ extension Element: HTMLConvertible {
             let innerElements = component.elements.filter { !isGuide($0) }
 
             let innerContent = innerElements.map(\.html).joined()
+            // TODO: perhaps a distinction whether you want guides above or below content
             let outerContent = guideElements.map(\.html).joined()
 
             let content = """

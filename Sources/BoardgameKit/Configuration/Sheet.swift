@@ -64,7 +64,6 @@ public struct Sheet {
                 destinationUrl: url,
                 resourceUrl: bundle?.resourceURL
             )
-            
             try doc.render()
 
         case let .pdf(url):
@@ -75,18 +74,19 @@ public struct Sheet {
                 withIntermediateDirectories: true,
                 attributes: nil
             )
+
             try document(target: .proof(at: tempLocationUrl), configuration: configuration)
             let proofUrl = tempLocationUrl.appendingPathComponent("proof")
             guard FileManager.default.fileExists(atPath: proofUrl.path) else {
                 fatalError()
             }
+
             let doc = PDFRenderer(
                 locationUrl: proofUrl,
                 destinationUrl: url,
                 paper: configuration.paper,
                 meta: description
             )
-
             try doc.render()
 
             try FileManager.default.removeItem(at: tempLocationUrl)

@@ -1,5 +1,8 @@
 import Foundation
 
+/**
+ The measurement of a surface on a rectangular shape.
+ */
 public struct Area: Dimensioned {
     public let extent: Size
 

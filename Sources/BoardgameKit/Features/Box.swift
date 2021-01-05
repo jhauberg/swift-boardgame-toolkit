@@ -14,6 +14,9 @@ struct BoxAttributes {
     var outerBorderWidth: Distance?
 }
 
+/**
+ A rectangular element.
+ */
 public struct Box: Feature, Dimensioned {
     public let form: Feature? = nil
 

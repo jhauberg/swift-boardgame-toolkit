@@ -5,6 +5,9 @@ struct ImageAttributes {
     var rotation: RotationAttributes?
 }
 
+/**
+ An image element.
+ */
 public struct Image: Feature {
     public let form: Feature? = nil
 

@@ -1,5 +1,8 @@
 import Foundation
 
+/**
+ A type that represents a visual feature on a printable component.
+ */
 public protocol Feature {
     @FeatureBuilder var form: Feature? { get }
 }

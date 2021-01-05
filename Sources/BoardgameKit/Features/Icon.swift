@@ -1,5 +1,8 @@
 import Foundation
 
+/**
+ An inline image element.
+ */
 public struct Icon {
     private let path: String
     private var scale: Double = 1

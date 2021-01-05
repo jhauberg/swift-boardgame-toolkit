@@ -12,6 +12,9 @@ struct TextAttributes {
     var rotation: RotationAttributes?
 }
 
+/**
+ A text element.
+ */
 public struct Text: Feature {
     public let form: Feature? = nil
 
