@@ -43,6 +43,12 @@ extension Style: CSSConvertible {
     }
 }
 
+extension Anchor: CSSConvertible {
+    var css: String {
+        "\(x * 100)% \(y * 100)%"
+    }
+}
+
 extension Measurement: CSSConvertible {
     var css: String {
         // to allow for the two extensions on UnitLength and UnitAngle;

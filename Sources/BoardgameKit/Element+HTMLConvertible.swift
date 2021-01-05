@@ -81,7 +81,7 @@ extension Element: HTMLConvertible {
             if let rotation = attr.rotation {
                 style.set(
                     "transform-origin",
-                    value: "\(rotation.anchor.x * 100)% \(rotation.anchor.y * 100)%"
+                    value: rotation.anchor.css
                 )
                 style.set(
                     "transform",
@@ -125,7 +125,7 @@ extension Element: HTMLConvertible {
             if let rotation = attr.rotation {
                 style.set(
                     "transform-origin",
-                    value: "\(rotation.anchor.x * 100)% \(rotation.anchor.y * 100)%"
+                    value: rotation.anchor.css
                 )
                 style.set(
                     "transform",
@@ -202,7 +202,7 @@ extension Element: HTMLConvertible {
             if let rotation = attr.rotation {
                 style.set(
                     "transform-origin",
-                    value: "\(rotation.anchor.x * 100)% \(rotation.anchor.y * 100)%"
+                    value: rotation.anchor.css
                 )
                 style.set(
                     "transform",
@@ -254,7 +254,7 @@ extension Element: HTMLConvertible {
             if let rotation = attr.rotation {
                 style.set(
                     "transform-origin",
-                    value: "\(rotation.anchor.x * 100)% \(rotation.anchor.y * 100)%"
+                    value: rotation.anchor.css
                 )
                 style.set(
                     "transform",
