@@ -4,55 +4,58 @@ html, body {
 }
 
 .page-frame {
+  position: relative;
+
+  box-sizing: border-box;
+
   background: #fff;
 
   overflow: hidden;
+}
 
+.page-content {
   position: relative;
 
   box-sizing: border-box;
 }
 
-.page-content {
-    position: relative;
-
-    box-sizing: border-box;
-}
-
 .component {
-    position: absolute;
-    box-sizing: border-box;
+  position: absolute;
+
+  box-sizing: border-box;
 }
 
 .component-content {
-  overflow: hidden;
-
   position: relative;
+
+  overflow: hidden;
 
   width: 100%;
   height: 100%;
 }
 
 .component-element {
-    position: absolute;
-    box-sizing: border-box;
+  position: absolute;
+
+  box-sizing: border-box;
 }
 
 .guide {
-    position: absolute;
-    pointer-events: none;
+  position: absolute;
+
+  pointer-events: none;
 }
 
 .do-not-print {
-    /* note that this setting does not really have anything to do with printing or not;
-     however, typically elements that you specify as not for print are elements used exclusively
-     for the preview; for example, the bleed/trim/safe overlays
-     these elements should not block a cursor from selecting text or similar on the actual
-     content elements, so we leave it here for now
-     if it turns out to make a difference, and for whatever reason actually makes sense to receive
-     pointer events on a non-printable element, then we will figure out a better solution at that point
-     */
-    pointer-events: none;
+  /* note that this setting does not really have anything to do with printing or not;
+   however, typically elements that you specify as not for print are elements used exclusively
+   for the preview; for example, the bleed/trim/safe overlays
+   these elements should not block a cursor from selecting text or similar on the actual
+   content elements, so we leave it here for now
+   if it turns out to make a difference, and for whatever reason actually makes sense to receive
+   pointer events on a non-printable element, then we will figure out a better solution at that point
+   */
+  pointer-events: none;
 }
 
 @media screen {
@@ -69,8 +72,8 @@ html, body {
 
 @media print {
   @page {
-      size: {{pw}} {{ph}};
-      margin: 0 !important;
+    size: {{pw}} {{ph}};
+    margin: 0 !important;
   }
 
   html, body {
@@ -82,7 +85,7 @@ html, body {
   }
 
   .guide {
-      visibility: visible;
+    visibility: visible;
   }
 
   .do-not-print {
