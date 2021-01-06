@@ -4,6 +4,13 @@ struct FreeformAttributes {
     var rotation: RotationAttributes?
 }
 
+/**
+ An element representing a block of raw HTML.
+
+ A freeform element is not "raw" in the sense that it forfeits all the common functionality of
+ other features; it can still be inset, confined and turned, etc. It is essentially a
+ frame inside a frame.
+ */
 public struct Freeform: Feature {
     public let form: Feature? = nil
 
@@ -14,6 +21,9 @@ public struct Freeform: Feature {
     private var attributes = FreeformAttributes()
     private var htmlAttributes = HTMLAttributes()
 
+    /**
+     Initialize a new block of raw HTML.
+     */
     public init(_ html: String) {
         content = html
     }

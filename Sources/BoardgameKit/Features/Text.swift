@@ -13,7 +13,11 @@ struct TextAttributes {
 }
 
 /**
- A text element.
+ An element representing a block of text.
+
+ By default, text blocks are sized to, but not confined by, the intrinsic size of the content.
+
+ If you want to center a text, you must first confine it by each dimension you want to center on.
  */
 public struct Text: Feature {
     public let form: Feature? = nil
@@ -25,6 +29,9 @@ public struct Text: Feature {
     private var attributes = TextAttributes()
     private var htmlAttributes = HTMLAttributes()
 
+    /**
+     Initialize a new text with the given textual content.
+     */
     public init(_ text: String) {
         content = text
     }

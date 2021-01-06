@@ -7,6 +7,10 @@ struct ImageAttributes {
 
 /**
  An image element.
+
+ By default, images are sized to, but not confined by, the intrinsic size of the image resource.
+
+ If you want to center an image, you must first confine it by each dimension you want to center on.
  */
 public struct Image: Feature {
     public let form: Feature? = nil
@@ -18,6 +22,11 @@ public struct Image: Feature {
     private var attributes = ImageAttributes()
     private var htmlAttributes = HTMLAttributes()
 
+    /**
+     Initialize a new image with the given resource path.
+
+     If the path is relative, it must be relative against the resource bundle.
+     */
     public init(_ path: String) {
         self.path = path
     }

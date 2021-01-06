@@ -15,7 +15,7 @@ struct BoxAttributes {
 }
 
 /**
- A rectangular element.
+ An element representing a rectangular shape.
  */
 public struct Box: Feature, Dimensioned {
     public let form: Feature? = nil
@@ -26,17 +26,28 @@ public struct Box: Feature, Dimensioned {
     private var attributes = BoxAttributes()
     private var htmlAttributes = HTMLAttributes()
 
+    /**
+     Initialize a new box sized to the given dimensions.
+     */
     public init(width: Distance, height: Distance) {
         precondition(width.value > 0)
         precondition(height.value > 0)
         extent = Size(width: width, height: height)
     }
 
+    /**
+     Initialize a new box sized to the given extents.
+     */
     public init(extent: Size) {
         self.init(width: extent.width,
                   height: extent.height)
     }
 
+    /**
+     Initialize a new box that exactly covers an existing area.
+
+     The box will have the same dimensions and insets of the given area.
+     */
     public init(covering area: Area) {
         self.init(extent: area.extent)
         // note the intentional "reversed" ordering of properties here

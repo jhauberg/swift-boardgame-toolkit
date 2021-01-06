@@ -36,7 +36,7 @@ final class ProofRenderer: Renderer {
         }
         try FileManager.default.copyItem(at: templateSiteUrl, to: siteUrl)
         // provided that an URL for .bundle/Contents/Resources has been specified,
-        // copy over all files as-is to the proof/site directory
+        // copy over all files as-is to the proof directory
         if let resourceUrl = resourceUrl {
             let resourceUrls = try FileManager.default.contentsOfDirectory(
                 at: resourceUrl,
