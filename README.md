@@ -12,7 +12,9 @@ Designing boardgames is a task that typically involves many tools; spreadsheets,
 
 This framework proposes that you **ditch all those tools** and instead work **entirely in code**!
 
-Don't buy that premise? Then `swift-boardgame-toolkit` is probably not for you. Otherwise, [read on](#motivation-continued).
+Don't buy that premise? Then `swift-boardgame-toolkit` is probably not for you.
+
+Otherwise, [read on](#motivation-continued).
 
 ## Features
 
@@ -23,7 +25,7 @@ Don't buy that premise? Then `swift-boardgame-toolkit` is probably not for you. 
 Here's a bite-sized example to whet your appetite:
 
 ```swift
-let cards = [
+let card =
     Component(width: 2.5.inches, height: 3.5.inches) { parts in
         Box(covering: parts.full)
             .border("black", width: 0.25.inches)
@@ -31,12 +33,11 @@ let cards = [
             .top(parts.safe.top)
             .left(parts.safe.left)
     }
-]
 
 try Sheet().document(
     target: .pdf(to: URL(fileURLWithPath: "output.pdf")),
     configuration: .portrait(on: .a4, arranging: [
-        Layout(cards, method: .natural(orderedBy: .skippingBacks)),
+        Layout([cards], method: .natural(orderedBy: .skippingBacks)),
     ])
 )
 ```
@@ -81,6 +82,10 @@ This is similar in regard to layout; with a declarative approach you can be conf
 This is not a novel idea, and `swift-boardgame-toolkit` shares many similarities with tools like [nanDeck](http://www.nandeck.com) and [Squib](https://github.com/andymeneely/squib). These are amazing and well-established tools, by the way.
 
 Though the goals behind this implementation might go a bit further, it all boils down to act as a sort-of glorified build script; define and model all parts of your game, simulate scenarios to validate game/balance and finally design and layout the physical components and arrange them on printable pages for human playtesting.
+
+### Disclaimer
+
+Finally, it's important for me to note that this project is an _experiment_ and absolutely a work-in-progress; I can't say with confidence that this is _the way_ for _everyone_ to build boardgames. It is, however, how _I_ want to do it.
 
 ## Learn More
 
