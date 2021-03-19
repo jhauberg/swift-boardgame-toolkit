@@ -37,7 +37,7 @@ let card =
 try Sheet().document(
     target: .pdf(to: URL(fileURLWithPath: "output.pdf")),
     configuration: .portrait(on: .a4, arranging: [
-        Layout([cards], method: .natural(orderedBy: .skippingBacks)),
+        Layout([card], method: .natural(orderedBy: .skippingBacks)),
     ])
 )
 ```
@@ -85,7 +85,7 @@ Though the goals behind this implementation might go a bit further, it all boils
 
 ### Disclaimer
 
-Finally, it's important for me to note that this project is an _experiment_ and absolutely a work-in-progress; I can't say with confidence that this is _the way_ for _everyone_ to build boardgames. It is, however, how _I_ want to do it.
+Finally, it's important for me to note that this project is an _experiment_ and absolutely a work-in-progress; it's very likely that there are things it can't (or won't) do, and I can't say with confidence that this is _the way_ for _everyone_ to build boardgames. It is, however, how _I'd_ like to do it.
 
 ## Learn More
 
