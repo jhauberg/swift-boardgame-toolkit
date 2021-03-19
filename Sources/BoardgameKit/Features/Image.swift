@@ -8,7 +8,8 @@ struct ImageAttributes {
 /**
  An image element.
 
- By default, images are sized to, but not confined by, the intrinsic size of the image resource.
+ By default, images are sized to, but not confined by, the intrinsic dimensions of the image
+ resource.
 
  If you want to center an image, you must first confine it by each dimension you want to center on.
  */

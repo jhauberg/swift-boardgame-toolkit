@@ -12,8 +12,8 @@ public struct Icon {
 
      If the path is relative, it must be relative against the resource bundle.
 
-     Icons are always sized to the intrinsic size of the image resource and scale automatically
-     with the text they occur within.
+     Icons are always sized and scaled to fit the text they occur within, but always keep
+     the aspect ratio from the intrinsic dimensions of the image.
      */
     public init(_ path: String) {
         self.path = path
@@ -22,7 +22,7 @@ public struct Icon {
     /**
      Set the scaling.
 
-     An icon is always sized relative to the text it occurs within.
+     An icon is always scaled relative to the text it occurs within.
 
      This means that a scale of `1` will size the icon to match the text, while a scale of `2`
      will size the icon to be twice as large as the text.

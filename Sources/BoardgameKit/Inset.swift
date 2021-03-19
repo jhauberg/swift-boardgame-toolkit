@@ -1,7 +1,7 @@
 import Foundation
 
 struct Inset {
-    let mutuallyExclusiveOpposites: Bool
+    let mutuallyExclusiveOpposites: Bool // typically defaults to `true`
 
     init(allowingOppositeInsets: Bool = false) {
         mutuallyExclusiveOpposites = !allowingOppositeInsets

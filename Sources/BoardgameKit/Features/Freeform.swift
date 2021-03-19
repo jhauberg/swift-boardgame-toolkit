@@ -8,8 +8,7 @@ struct FreeformAttributes {
  An element representing a block of raw HTML.
 
  A freeform element is not "raw" in the sense that it forfeits all the common functionality of
- other features; it can still be inset, confined and turned, etc. It is essentially a
- frame inside a frame.
+ other features; it can still be inset, confined and turned, and so on.
  */
 public struct Freeform: Feature {
     public let form: Feature? = nil
