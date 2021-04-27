@@ -22,7 +22,10 @@ let package = Package(
             name: "BoardgameKit",
             dependencies: [],
             resources: [
-                .copy("templates"),
+                // note that these resources are bundled specifically for the
+                // library target; this means naming will never produce conflicts
+                // with resources bundled through executable targets
+                .copy("Rendering/Templates"),
             ]
         ),
 

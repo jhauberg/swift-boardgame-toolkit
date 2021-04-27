@@ -30,7 +30,7 @@ final class ProofRenderer: Renderer {
         // remove any existing directory; note that we don't need to handle "no such file" exception
         try? FileManager.default.removeItem(at: siteUrl)
         guard let templateSiteUrl = Bundle.module.resourceURL?
-            .appendingPathComponent("templates/proof")
+            .appendingPathComponent("Templates/Proof")
         else {
             fatalError()
         }

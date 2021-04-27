@@ -19,7 +19,7 @@ final class ImageRenderer: Renderer {
 
     init(configuration: ImagesConfiguration, destinationUrl: URL?, resourceUrl: URL?) throws {
         guard let templateUrl = Bundle.module.resourceURL?
-            .appendingPathComponent("templates/render/index.html")
+            .appendingPathComponent("Templates/Image/index.html")
         else {
             fatalError()
         }
