@@ -1,27 +1,28 @@
 import Foundation
 
-@_functionBuilder
+@resultBuilder
 public enum FeatureBuilder {
-    public static func buildBlock(_ component: Feature) -> Feature {
-        component
+    public static func buildBlock(_ features: Feature...) -> Feature {
+        Group(children: features)
     }
 
-    public static func buildBlock(_ children: Feature...) -> Feature {
-        Group(children: children)
+    public static func buildArray(_ features: [Feature]) -> Feature {
+        Group(children: features)
     }
 
-    public static func buildIf(_ component: Feature?) -> Feature {
-        component ?? Group(children: [])
+    public static func buildEither(first feature: Feature) -> Feature {
+        feature
     }
 
-    public static func buildEither(first: Feature) -> Feature {
-        first
+    public static func buildEither(second feature: Feature) -> Feature {
+        feature
     }
 
-    public static func buildEither(second: Feature) -> Feature {
-        second
+    public static func buildOptional(_ feature: Feature?) -> Feature {
+        feature ?? Group(children: [])
     }
 
-    // intentionally leaving out buildDo, as catch clauses do not seem to
-    // currently be supported in @_functionBuilder
+    public static func buildFinalResult(_ feature: Feature) -> Feature {
+        feature
+    }
 }
