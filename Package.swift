@@ -1,4 +1,4 @@
-// swift-tools-version:5.3
+// swift-tools-version:5.4
 
 import PackageDescription
 
@@ -26,7 +26,7 @@ let package = Package(
             ]
         ),
 
-        .target(
+        .executableTarget(
             name: "print-standard-deck",
             dependencies: ["BoardgameKit"],
             path: "Examples/print-standard-deck"
