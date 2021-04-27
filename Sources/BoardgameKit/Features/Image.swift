@@ -33,14 +33,14 @@ public struct Image: Feature {
     }
 }
 
-extension Image {
-    public enum ScaleMode {
+public extension Image {
+    enum ScaleMode {
         case contain
         case cover
         case fill
     }
 
-    public func scale(_ mode: ScaleMode) -> Self {
+    func scale(_ mode: ScaleMode) -> Self {
         var copy = self
         copy.attributes.mode = mode
         return copy

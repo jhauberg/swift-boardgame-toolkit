@@ -8,7 +8,7 @@ protocol Centerable: Insettable & Confinable {
      Center within an area, either horizontally, vertically or both.
 
      The feature must have dimensionality on the appropriate axis before it can be centered.
-     
+
      For example, to center horizontally, a feature must have a horizontal dimension (width).
 
      - Parameters:

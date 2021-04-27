@@ -88,7 +88,7 @@ extension PDFRenderer: WKNavigationDelegate {
         let printInfo = NSPrintInfo(
             dictionary: [
                 NSPrintInfo.AttributeKey.jobDisposition: NSPrintInfo.JobDisposition.save,
-                // todo: URLs like `URL(fileURLWithPath: "output.pdf")` trigger output:
+                // TODO: URLs like `URL(fileURLWithPath: "output.pdf")` trigger output:
                 //         CFURLGetFSRef was passed an URL which has no scheme (the URL will not work with other CFURL routines)
                 //         CFURLCopyResourcePropertyForKey failed because it was passed an URL which has no scheme
                 //       though it still works as expected, these warnings are distracting

@@ -37,27 +37,27 @@ public struct ImagesConfiguration {
     }
 }
 
-extension ImagesConfiguration {
-    public static func custom(
+public extension ImagesConfiguration {
+    static func custom(
         dpi: Int,
         arranging components: ArraySlice<Component>
     ) -> ImagesConfiguration {
         custom(dpi: dpi, arranging: Array(components))
     }
 
-    public static func print(
+    static func print(
         arranging components: ArraySlice<Component>
     ) -> ImagesConfiguration {
         print(arranging: Array(components))
     }
 
-    public static func regular(
+    static func regular(
         arranging components: ArraySlice<Component>
     ) -> ImagesConfiguration {
         regular(arranging: Array(components))
     }
-    
-    public static func web(
+
+    static func web(
         arranging components: ArraySlice<Component>
     ) -> ImagesConfiguration {
         web(arranging: Array(components))

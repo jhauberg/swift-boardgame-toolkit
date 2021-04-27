@@ -190,7 +190,7 @@ public struct Component: Dimensioned {
         from component: ((_ back: Component) -> Component) = { back in back },
         @FeatureBuilder form: FeatureComposition
     ) -> Self {
-        return backside(
+        backside(
             component(removingElements)
                 .with(form)
         )
@@ -333,8 +333,8 @@ extension Component {
     }
 }
 
-extension Component {
-    public struct Partition {
+public extension Component {
+    struct Partition {
         public let full: Area // largest area, before a cut; i.e. with bleed
         public let real: Area // final area after a cut; i.e. without bleed, but with trim
         public let safe: Area // smallest area, safely nested inside trim lines
@@ -406,19 +406,19 @@ extension Component {
             let reach = bleed
             return with { parts in
                 Box(covering:
-                        Area(top: inset,
-                             left: inset - extent - reach,
-                             right: inset - extent - reach,
-                             bottom: inset,
-                             in: parts.real))
+                    Area(top: inset,
+                         left: inset - extent - reach,
+                         right: inset - extent - reach,
+                         bottom: inset,
+                         in: parts.real))
                     .border(color, width: trimWidth, style: border, edges: [.top, .bottom])
                     .classed("guide")
                 Box(covering:
-                        Area(top: inset - extent - reach,
-                             left: inset,
-                             right: inset,
-                             bottom: inset - extent - reach,
-                             in: parts.real))
+                    Area(top: inset - extent - reach,
+                         left: inset,
+                         right: inset,
+                         bottom: inset - extent - reach,
+                         in: parts.real))
                     .border(color, width: trimWidth, style: border, edges: [.left, .right])
                     .classed("guide")
             }

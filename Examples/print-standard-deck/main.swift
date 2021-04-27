@@ -140,7 +140,8 @@ let cards = suits.flatMap { suit in
 let sheet = Sheet()
 // define location to save our finished document
 let url = URL( // "simplex" is just another word for "single-sided printing"
-    fileURLWithPath: "standard-deck.A4.simplex.pdf")
+    fileURLWithPath: "standard-deck.A4.simplex.pdf"
+)
 // save the sheet as a pdf on A4 paper, portrait-oriented,
 // arranging cards in a natural, left-to-right order
 // this should fit 3x3 cards on every page
@@ -161,4 +162,4 @@ try sheet.document(
 )
 
 // if all went well, the pdf should now be located at the printed path
-print("saved at \(url.path)")
+print("saved at \(url.deletingLastPathComponent().path)")

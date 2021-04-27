@@ -57,28 +57,28 @@ public struct Text: Feature {
     }
 }
 
-extension Text {
-    public enum HorizontalAlignment {
+public extension Text {
+    enum HorizontalAlignment {
         case left
         case center
         case right
         case justify
     }
 
-    public enum VerticalAlignment {
+    enum VerticalAlignment {
         case top
         case middle
         case bottom
     }
 
-    public func align(horizontally: HorizontalAlignment) -> Self {
+    func align(horizontally: HorizontalAlignment) -> Self {
         var copy = self
         // note that alignment has no effect unless bounded horizontally (e.g. width is set)
         copy.attributes.horizontalAlignment = horizontally
         return copy
     }
 
-    public func align(vertically: VerticalAlignment) -> Self {
+    func align(vertically: VerticalAlignment) -> Self {
         var copy = self
         // note that alignment has no effect unless bounded vertically (e.g. height is set)
         // we can't be sure height won't be set later, so no warning is emitted at this point

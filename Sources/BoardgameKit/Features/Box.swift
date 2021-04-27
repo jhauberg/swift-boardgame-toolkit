@@ -100,8 +100,8 @@ public struct Box: Feature, Dimensioned {
     }
 }
 
-extension Box {
-    public enum BorderStyle {
+public extension Box {
+    enum BorderStyle {
         case solid
         case dotted
         case dashed
@@ -109,7 +109,7 @@ extension Box {
         case double
     }
 
-    public struct Border: OptionSet {
+    struct Border: OptionSet {
         public let rawValue: Int
 
         public init(rawValue: Int) {
@@ -123,9 +123,9 @@ extension Box {
 
         public static let all: Border = [.top, .right, .bottom, .left]
     }
-    
+
     // note that borders always go _inside_ the box, as all features have `box-sizing: border-box`
-    public func border(
+    func border(
         _ color: String,
         width: Distance = 1.millimeters,
         style: BorderStyle = .solid,

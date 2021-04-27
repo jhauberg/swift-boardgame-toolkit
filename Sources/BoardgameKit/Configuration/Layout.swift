@@ -226,23 +226,23 @@ public struct Layout {
     }
 }
 
-extension Layout {
-    public init(_ components: ArraySlice<Component>, method: Method) {
+public extension Layout {
+    init(_ components: ArraySlice<Component>, method: Method) {
         self.init(Array(components), method: method)
     }
 }
 
-extension Layout {
-    public enum Method {
+public extension Layout {
+    enum Method {
         /**
          Arrange components in order, allowing for single-sided printing (simplex printing).
 
          A gap can be specified to add spacing between each component horizontally and vertically.
          */
         case natural(
-                orderedBy: Order = .frontsThenBacks,
-                gap: Size = .zero
-             )
+            orderedBy: Order = .frontsThenBacks,
+            gap: Size = .zero
+        )
         /**
          Arrange components such that fronts and backs go on odd and even pages, respectively,
          allowing for double-sided printing (duplex printing).
@@ -261,9 +261,9 @@ extension Layout {
          For manual duplexing, may God be with you.
          */
         case duplex(
-                gap: Size = .zero,
-                guides: Guide.Distribution = .back
-             )
+            gap: Size = .zero,
+            guides: Guide.Distribution = .back
+        )
         /**
          Arrange components such that fronts and backs go on the same page, mirrored from a
          folding line going through the middle of the page.
@@ -284,10 +284,10 @@ extension Layout {
          If your printer has large margins, consider reducing the bleed or folding gutter.
          */
         case fold(
-                gap: Size = .zero,
-                gutter: Distance = 6.millimeters,
-                guides: Guide.Distribution = .back
-             )
+            gap: Size = .zero,
+            gutter: Distance = 6.millimeters,
+            guides: Guide.Distribution = .back
+        )
         /**
          Arrange components in order, at pre-defined placements and orientations on a page.
 
@@ -301,14 +301,14 @@ extension Layout {
          or to print on pre-cut/perforated paper.
          */
         case custom(
-                orderedBy: Order,
-                _ arrangements: [Arrangement]
-             )
+            orderedBy: Order,
+            _ arrangements: [Arrangement]
+        )
     }
 }
 
-extension Layout {
-    public enum Turn {
+public extension Layout {
+    enum Turn {
         public enum Count: Int {
             case once = 1
             case twice = 2
@@ -335,14 +335,14 @@ extension Layout {
         }
     }
 
-    enum ArrangementType {
+    internal enum ArrangementType {
         case placement(turned: Turn?)
         case pagebreak
         case cut(distance: Distance, vertically: Bool)
         case fold(distance: Distance, vertically: Bool)
     }
 
-    public struct Arrangement {
+    struct Arrangement {
         private(set) var offset: Size?
 
         let kind: ArrangementType
@@ -445,7 +445,8 @@ private extension Array where Element == Component {
 
         for component in self {
             guard component.portraitOrientedExtent.width <= paper.innerBounds.width,
-                  component.portraitOrientedExtent.height <= paper.innerBounds.height else {
+                  component.portraitOrientedExtent.height <= paper.innerBounds.height
+            else {
                 // component does not fit on this paper
                 fatalError()
             }

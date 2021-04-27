@@ -45,7 +45,7 @@ final class ProofRenderer: Renderer {
             )
             for resource in resourceUrls {
                 #if DEBUG
-                print("Copying \"\(resource.lastPathComponent)\" ...")
+                    print("Copying \"\(resource.lastPathComponent)\" ...")
                 #endif
                 try FileManager.default.copyItem(
                     at: resource,

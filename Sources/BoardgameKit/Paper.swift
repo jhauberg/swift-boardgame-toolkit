@@ -11,9 +11,9 @@ public struct Paper: Dimensioned {
     public init(_ size: Size, _ margin: Margin) {
         precondition(size.width > margin.width * 2)
         precondition(size.height > margin.height * 2)
-        self.extent = size
+        extent = size
         self.margin = margin
-        self.innerBounds = Size(
+        innerBounds = Size(
             width: size.width - margin.width * 2,
             height: size.height - margin.height * 2
         )

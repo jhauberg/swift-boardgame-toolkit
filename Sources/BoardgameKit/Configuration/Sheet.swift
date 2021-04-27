@@ -97,9 +97,8 @@ public struct Sheet {
         var pages: [Page] = []
 
         for layout in configuration.layouts.splitBySize {
-            pages.append(
-                contentsOf:
-                    layout.pages(on: configuration.paper)
+            pages.append(contentsOf:
+                layout.pages(on: configuration.paper)
             )
         }
 

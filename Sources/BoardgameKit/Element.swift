@@ -11,48 +11,48 @@ struct RotationAttributes {
 
 enum Element {
     case rect(
-            inset: Inset,
-            bounds: Size,
-            attributes: BoxAttributes,
-            additional: HTMLAttributes
-         )
+        inset: Inset,
+        bounds: Size,
+        attributes: BoxAttributes,
+        additional: HTMLAttributes
+    )
     case text(
-            _ content: String,
-            inset: Inset,
-            width: Distance?,
-            height: Distance?,
-            attributes: TextAttributes,
-            additional: HTMLAttributes
-         )
+        _ content: String,
+        inset: Inset,
+        width: Distance?,
+        height: Distance?,
+        attributes: TextAttributes,
+        additional: HTMLAttributes
+    )
     case image(
-            _ path: String,
-            inset: Inset,
-            width: Distance?,
-            height: Distance?,
-            attributes: ImageAttributes,
-            additional: HTMLAttributes
-         )
+        _ path: String,
+        inset: Inset,
+        width: Distance?,
+        height: Distance?,
+        attributes: ImageAttributes,
+        additional: HTMLAttributes
+    )
     case freeform(
-            _ content: String,
-            inset: Inset,
-            width: Distance?,
-            height: Distance?,
-            attributes: FreeformAttributes,
-            additional: HTMLAttributes
-         )
+        _ content: String,
+        inset: Inset,
+        width: Distance?,
+        height: Distance?,
+        attributes: FreeformAttributes,
+        additional: HTMLAttributes
+    )
     case component(
-            _ component: Component,
-            x: Units,
-            y: Units,
-            turned: Layout.Turn? = nil
-         )
+        _ component: Component,
+        x: Units,
+        y: Units,
+        turned: Layout.Turn? = nil
+    )
     case page(
-            _ page: Page,
-            margin: Margin
-         )
+        _ page: Page,
+        margin: Margin
+    )
     case document(
-            template: String,
-            paper: Paper,
-            pages: [Page]
-         )
+        template: String,
+        paper: Paper,
+        pages: [Page]
+    )
 }
