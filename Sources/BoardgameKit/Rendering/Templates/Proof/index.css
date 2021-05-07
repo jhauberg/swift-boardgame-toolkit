@@ -58,6 +58,8 @@ html, body {
   pointer-events: none;
 }
 
+{{fonts}}
+
 @media screen {
   html, body {
     background-color: #eee;
